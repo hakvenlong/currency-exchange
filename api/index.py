@@ -63,11 +63,12 @@ def get_daily_stats():
     return stats, len(rows), rows
 
 # --- PDF GENERATOR ---
+
 def generate_pdf_invoice(from_curr, to_curr, amount, total, rate, op):
     now = datetime.datetime.now()
     filename = f"DPK_Invoice_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
     
-    # Ensure folder exists immediately before saving
+    # Ensure folder exists
     if not os.path.exists(INVOICE_FOLDER):
         os.makedirs(INVOICE_FOLDER)
 
@@ -76,34 +77,37 @@ def generate_pdf_invoice(from_curr, to_curr, amount, total, rate, op):
     pdf = FPDF(format='A5')
     pdf.add_page()
     
+    # OLD SYNTAX (ln=1 instead of new_x/new_y)
     pdf.set_font("Helvetica", 'B', 20)
-    pdf.cell(0, 12, 'DPK Exchange', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 12, 'DPK Exchange', ln=1, align='C')
     
     pdf.set_font("Helvetica", '', 10)
-    pdf.cell(0, 8, 'Official Receipt', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    pdf.cell(0, 8, f"Date: {now.strftime('%d %B %Y')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    pdf.cell(0, 8, f"Time: {now.strftime('%H:%M:%S')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 8, 'Official Receipt', ln=1, align='C')
+    pdf.cell(0, 8, f"Date: {now.strftime('%d %B %Y')}", ln=1, align='C')
+    pdf.cell(0, 8, f"Time: {now.strftime('%H:%M:%S')}", ln=1, align='C')
     pdf.ln(5)
     pdf.line(15, pdf.get_y(), 133, pdf.get_y())
     pdf.ln(5)
     
     pdf.set_font("Helvetica", 'B', 14)
-    pdf.cell(0, 10, 'Exchange Details', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 10, 'Exchange Details', ln=1, align='C')
     
     pdf.set_font("Helvetica", '', 12)
-    pdf.cell(0, 10, f"From: {amount:,.2f} {from_curr}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 10, f"To:     {total:,.2f} {to_curr}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 10, f"From: {amount:,.2f} {from_curr}", ln=1)
+    pdf.cell(0, 10, f"To:     {total:,.2f} {to_curr}", ln=1)
     
     pdf.set_font("Helvetica", 'B', 12)
-    pdf.cell(0, 10, f"Rate: 1 {from_curr} = {rate:,.4f} {to_curr}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 10, f"{amount:,.2f} {op} {rate:,.4f} = {total:,.2f}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 10, f"Rate: 1 {from_curr} = {rate:,.4f} {to_curr}", ln=1)
+    pdf.cell(0, 10, f"{amount:,.2f} {op} {rate:,.4f} = {total:,.2f}", ln=1)
     
     pdf.ln(10)
     pdf.set_font("Helvetica", 'I', 11)
-    pdf.cell(0, 10, 'Thank you for using DPK Exchange!', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 10, 'Thank you for using DPK Exchange!', ln=1, align='C')
     
     pdf.output(path)
     return filename
+
+# ... rest of code ...
 
 # --- ROUTES ---
 @app.route('/')
