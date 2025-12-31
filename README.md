@@ -23,8 +23,8 @@ Follow these steps to run the project locally on your computer.
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/dpk-exchange.git](https://github.com/YOUR_USERNAME/dpk-exchange.git)
-cd dpk-exchange
+git clone https://github.com/hakvenlong/currency-exchange.git
+cd CURRENCYEXCHANGE
 2. Install Dependencies
 Make sure you have Python installed.
 
