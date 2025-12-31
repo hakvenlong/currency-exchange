@@ -8,10 +8,13 @@ from fpdf import FPDF
 load_dotenv()
 
 app = Flask(__name__)
+# --- CONFIGURATION FOR VERCEL ---
+# Vercel only allows writing to /tmp
+DB_FILE = '/tmp/exchange.db' 
+INVOICE_FOLDER = '/tmp/invoices'
 
-# Create invoices folder
-if not os.path.exists('invoices'):
-    os.makedirs('invoices')
+if not os.path.exists(INVOICE_FOLDER):
+    os.makedirs(INVOICE_FOLDER)
 
 # Currency symbols
 SYMBOLS = {
