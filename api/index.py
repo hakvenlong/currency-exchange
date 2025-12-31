@@ -19,9 +19,11 @@ else:
     INVOICE_FOLDER = '/tmp/invoices'
 
 if not os.path.exists(INVOICE_FOLDER):
-    os.makedirs(INVOICE_FOLDER)
+    try:
+        os.makedirs(INVOICE_FOLDER)
+    except Exception as e:
+        print(f"Warning: Could not create folder at startup: {e}")
 
-# Symbols for Currency
 SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'}
 
 def init_db():
@@ -64,6 +66,11 @@ def get_daily_stats():
 def generate_pdf_invoice(from_curr, to_curr, amount, total, rate, op):
     now = datetime.datetime.now()
     filename = f"DPK_Invoice_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    # Ensure folder exists immediately before saving
+    if not os.path.exists(INVOICE_FOLDER):
+        os.makedirs(INVOICE_FOLDER)
+
     path = os.path.join(INVOICE_FOLDER, filename)
     
     pdf = FPDF(format='A5')
@@ -125,6 +132,7 @@ def exchange():
 
         return jsonify({'success': True, 'total': total, 'pdf_url': f"/download/{pdf_filename}", 'op': op})
     except Exception as e:
+        print(f"EXCHANGE ERROR: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/stats')
@@ -139,7 +147,7 @@ def download(filename):
         return send_file(file_path, as_attachment=True)
     return "File not found", 404
 
-# --- TELEGRAM BOT (UPDATED FORMAT) ---
+# --- TELEGRAM BOT ---
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
@@ -152,19 +160,15 @@ def save_to_telegram():
         data = request.json
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Create Full PDF Link (http://domain.com/download/file.pdf)
-        full_pdf_link = request.url_root.rstrip('/') + data.get('pdf_url', '#')
-
         # Format Values
         amount_val = float(data['amount'])
         total_val = float(data['total'])
         rate_val = float(data['rate'])
         
-        # Symbols
         sym_from = SYMBOLS.get(data['from'], '')
         sym_to = SYMBOLS.get(data['to'], '')
 
-        # Build Message
+        # Build Message (PDF Link Removed)
         msg = f"""
 <b>Saved Record – DPK Exchange</b>
 <i>{now_str}</i>
@@ -173,8 +177,6 @@ def save_to_telegram():
 <b>To:</b> {total_val:,.2f} {sym_to} ({data['to']})
 <b>Rate:</b> 1 {data['from']} = {rate_val:,.4f} {data['to']}
 <b>Calculation:</b> {amount_val:,.2f} {data.get('op', '×')} {rate_val:,.4f} = {total_val:,.2f}
-
-<a href="{full_pdf_link}">📄 Download Invoice PDF</a>
 
 Saved manually from web 🌟
         """.strip()
@@ -188,4 +190,5 @@ Saved manually from web 🌟
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
+    print(f"🚀 App Started. Saving invoices to: {INVOICE_FOLDER}")
     app.run(debug=True)
