@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPK Exchange | Professional Portal</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --glass-bg: rgba(30, 30, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-color: #818cf8;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --card-radius: 24px;
+            --input-radius: 16px;
+        }
+
+        [data-bs-theme="light"] {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            /* Priority: English Font -> Khmer -> Chinese */
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', 'Noto Sans SC', sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            color: var(--text-main);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.15), transparent 25%);
+        }
+
+        /* Navbar */
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        /* Input Groups */
+        .currency-input-group {
+            background: rgba(255,255,255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--input-radius);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+        [data-bs-theme="light"] .currency-input-group {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        .currency-input-group:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .currency-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 15px;
+            border-right: 1px solid var(--glass-border);
+            min-width: 140px;
+        }
+        .currency-select img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+        .currency-select select {
+            background: transparent; border: none; color: var(--text-main);
+            font-weight: 700; cursor: pointer; outline: none; width: 100%;
+        }
+        .currency-select select option { background: #1e293b; color: white; }
+        [data-bs-theme="light"] .currency-select select option { background: white; color: black; }
+
+        .amount-field {
+            flex: 1; background: transparent; border: none; color: var(--text-main);
+            font-size: 1.75rem; font-weight: 700; text-align: right; outline: none; padding-left: 15px; width: 100%;
+        }
+        
+        /* Swap Button */
+        .swap-btn-container {
+            position: relative; height: 20px; display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+        .btn-swap {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--text-main); color: #0f172a;
+            border: none; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease;
+        }
+        [data-bs-theme="light"] .btn-swap { background: #0f172a; color: white; }
+        .btn-swap:hover {
+            transform: rotate(180deg) scale(1.1); background: var(--accent-color); color: white;
+        }
+
+        /* Rate Cards (Mini) */
+        .rate-card-mini {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .rate-input-sm {
+            background: transparent; border: none; border-bottom: 1px solid var(--glass-border);
+            color: var(--accent-color); font-weight: 600; width: 80px; text-align: right; padding: 2px 0;
+        }
+        .rate-input-sm:focus { outline: none; border-color: var(--accent-color); }
+
+        /* Action Buttons */
+        .btn-primary-gradient {
+            background: var(--primary-gradient); border: none; color: white; font-weight: 600;
+            padding: 14px; border-radius: var(--input-radius); width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .btn-primary-gradient:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-action {
+            border-radius: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center;
+            gap: 8px; height: 100%;
+        }
+
+        /* Nav Controls */
+        .nav-icon-btn {
+            cursor: pointer; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.1); color: var(--text-main); transition: all 0.3s;
+            border: none;
+        }
+        .nav-icon-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+        [data-bs-theme="light"] .dropdown-menu { background: rgba(255,255,255,0.95); }
+        .dropdown-item { color: var(--text-main); font-weight: 500; }
+        .dropdown-item:hover { background: var(--accent-color); color: white; }
+
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; height: 0; overflow: hidden; }
+            #printReceipt, #printReceipt * { visibility: visible; height: auto; overflow: visible; }
+            #printReceipt {
+                display: block !important; position: absolute; left: 0; top: 0;
+                width: 80mm; margin: 0; padding: 10px;
+                background: white !important; color: black !important;
+                font-family: 'Courier New', monospace;
+            }
+            @page { size: auto; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs"></div>
+
+    <nav class="navbar navbar-expand-lg py-3">
+        <div class="container">
+            <a class="navbar-brand fs-3" href="#"><i class="fas fa-wallet me-2"></i>DPK Exchange</a>
+            
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted d-none d-md-block small me-2" id="liveClock">Loading...</span>
+
+                <div class="dropdown">
+                    <button class="nav-icon-btn" data-bs-toggle="dropdown" title="Change Language">
+                        <i class="fas fa-globe"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                        <li><a class="dropdown-item" href="#" onclick="setLanguage('en')">🇺🇸 English</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="setLanguage('km')">🇰🇭 ភាសាខ្មែរ</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="setLanguage('zh')">🇨🇳 中文</a></li>
+                    </ul>
+                </div>
+
+                <button class="nav-icon-btn" id="darkToggle" title="Toggle Theme">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3 mb-5">
+        <div class="row g-4">
+            
+            <div class="col-lg-7">
+                <div class="glass-card h-100 d-flex flex-column justify-content-center">
+                    <h2 class="mb-4 fw-bold" data-i18n="hero_title">Currency Exchange</h2>
+                    
+                    <div class="currency-input-group">
+                        <div class="currency-select">
+                            <img id="fromFlag" src="https://flagcdn.com/us.svg" alt="Flag">
+                            <select id="fromCurrency" onchange="updateFlag('from'); calculateReverse()">
+                                <option value="USD" data-flag="us">USD</option>
+                                <option value="KHR" data-flag="kh">KHR</option>
+                                <option value="THB" data-flag="th">THB</option>
+                            </select>
+                            <i class="fas fa-chevron-down fa-xs text-muted"></i>
+                        </div>
+                        <input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00">
+                    </div>
+
+                    <div class="swap-btn-container">
+                        <button class="btn-swap" onclick="swapCurrencies()">
+                            <i class="fas fa-arrow-down-up"></i>
+                        </button>
+                    </div>
+
+                    <div class="currency-input-group">
+                        <div class="currency-select">
+                            <img id="toFlag" src="https://flagcdn.com/kh.svg" alt="Flag">
+                            <select id="toCurrency" onchange="updateFlag('to'); calculateReverse()">
+                                <option value="KHR" data-flag="kh">KHR</option>
+                                <option value="USD" data-flag="us">USD</option>
+                                <option value="THB" data-flag="th">THB</option>
+                            </select>
+                            <i class="fas fa-chevron-down fa-xs text-muted"></i>
+                        </div>
+                        <input type="text" id="toAmount" class="amount-field" readonly placeholder="0.00">
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between text-muted mb-2 small">
+                            <span data-i18n="label_rate">Current Rate</span>
+                            <span id="displayRate">1 USD = 4008 KHR</span>
+                        </div>
+                        <button onclick="exchange()" class="btn-primary-gradient fs-5 shadow-lg">
+                            <span data-i18n="btn_process">Process Transaction</span> <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+
+                    <div id="actions" class="mt-4 pt-3 border-top border-secondary border-opacity-25" style="display:none;">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <a id="downloadLink" href="#" target="_blank" class="btn btn-outline-light btn-action w-100">
+                                    <i class="fas fa-file-pdf text-danger"></i> <span data-i18n="btn_pdf">PDF</span>
+                                </a>
+                            </div>
+                            <div class="col-4">
+                                <button onclick="printNow()" class="btn btn-outline-light btn-action w-100">
+                                    <i class="fas fa-print text-warning"></i> <span data-i18n="btn_print">Print</span>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button id="saveTelegramBtn" onclick="saveToTelegram()" class="btn btn-outline-light btn-action w-100">
+                                    <i class="fab fa-telegram text-info"></i> <span data-i18n="btn_save">Save</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="saveStatus" class="text-center mt-2 small fw-bold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="glass-card h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="fw-bold m-0"><i class="fas fa-chart-line me-2 text-primary"></i><span data-i18n="admin_title">Live Rates</span></h4>
+                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25" data-i18n="admin_badge">Admin</span>
+                    </div>
+
+                    <div class="rate-grid">
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/us.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/kh.svg" width="20">
+                                <span class="fw-bold small ms-1">USD/KHR</span>
+                            </div>
+                            <input id="usd_khr" type="number" class="rate-input-sm" value="4008" onchange="calculateReverse()">
+                        </div>
+
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/us.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/th.svg" width="20">
+                                <span class="fw-bold small ms-1">USD/THB</span>
+                            </div>
+                            <input id="usd_thb" type="number" class="rate-input-sm" value="31.44" step="0.01" onchange="calculateReverse()">
+                        </div>
+
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/kh.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/us.svg" width="20">
+                                <span class="fw-bold small ms-1">KHR/USD</span>
+                            </div>
+                            <input id="khr_usd" type="number" class="rate-input-sm" value="4021" onchange="calculateReverse()">
+                        </div>
+
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/kh.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/th.svg" width="20">
+                                <span class="fw-bold small ms-1">KHR/THB</span>
+                            </div>
+                            <input id="khr_thb" type="number" class="rate-input-sm" value="127.6" step="0.1" onchange="calculateReverse()">
+                        </div>
+
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/th.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/us.svg" width="20">
+                                <span class="fw-bold small ms-1">THB/USD</span>
+                            </div>
+                            <input id="thb_usd" type="number" class="rate-input-sm" value="31.82" step="0.01" onchange="calculateReverse()">
+                        </div>
+
+                        <div class="rate-card-mini">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://flagcdn.com/th.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/kh.svg" width="20">
+                                <span class="fw-bold small ms-1">THB/KHR</span>
+                            </div>
+                            <input id="thb_khr" type="number" class="rate-input-sm" value="127.60" step="0.01" onchange="calculateReverse()">
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info bg-transparent border-info text-info small mt-3">
+                        <i class="fas fa-info-circle me-1"></i> <span data-i18n="info_update">Rate changes update the converter immediately.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center text-muted mt-5 small">
+            <p data-i18n="footer">&copy; 2025 DPK Exchange System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="printReceipt" style="display:none; font-family: 'Courier New', monospace; padding: 10px;">
+        <div class="receipt-header" style="text-align:center; font-weight:bold; font-size:18px;">DPK Exchange</div>
+        <div style="text-align: center; font-size: 12px; margin-bottom: 5px;">------------------------</div>
+        <div id="printDateTime" style="text-align: center; font-size: 12px;"></div>
+        <div style="text-align: center; font-size: 12px; margin-bottom: 5px;">------------------------</div>
+        <div id="receiptLabel" style="text-align: center; font-size: 12px;" data-i18n="receipt_official">Official Receipt</div>
+        <div id="printDetails" style="font-size: 14px; font-weight: bold; margin: 10px 0;"></div>
+        <div id="printRate" style="font-size: 12px;"></div>
+        <div style="text-align: center; font-size: 12px; margin-top: 5px;">------------------------</div>
+        <div style="text-align: center; font-size: 12px; margin-top: 10px;" data-i18n="receipt_thankyou">Thank you!</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- TRANSLATION DATA ---
+        const translations = {
+            en: {
+                hero_title: "Currency Exchange",
+                label_rate: "Current Rate",
+                btn_process: "Process Transaction",
+                btn_pdf: "PDF",
+                btn_print: "Print",
+                btn_save: "Save",
+                admin_title: "Live Rates",
+                admin_badge: "Admin",
+                info_update: "Rate changes update the converter immediately.",
+                footer: "© 2025 DPK Exchange System. All rights reserved.",
+                receipt_official: "Official Receipt",
+                receipt_thankyou: "Thank you!"
+            },
+            km: {
+                hero_title: "ការប្តូរប្រាក់",
+                label_rate: "អត្រាប្តូរប្រាក់បច្ចុប្បន្ន",
+                btn_process: "ប្រតិបត្តិការប្តូរប្រាក់",
+                btn_pdf: "ឯកសារ PDF",
+                btn_print: "បោះពុម្ព",
+                btn_save: "រក្សាទុក",
+                admin_title: "តារាងអត្រាប្តូរប្រាក់",
+                admin_badge: "អ្នកគ្រប់គ្រង",
+                info_update: "ការផ្លាស់ប្តូរអត្រានឹងធ្វើបច្ចុប្បន្នភាពភ្លាមៗ។",
+                footer: "រក្សាសិទ្ធិគ្រប់យ៉ាង © ២០២៥ DPK Exchange",
+                receipt_official: "វិក្កយបត្រផ្លូវការ",
+                receipt_thankyou: "សូមពិនិត្យមុនចាកចេញ សូមអរគុណ!"
+            },
+            zh: {
+                hero_title: "货币兑换",
+                label_rate: "当前汇率",
+                btn_process: "处理交易",
+                btn_pdf: "PDF下载",
+                btn_print: "打印",
+                btn_save: "保存",
+                admin_title: "实时汇率",
+                admin_badge: "管理员",
+                info_update: "汇率更改将立即更新转换器。",
+                footer: "© 2025 DPK 兑换系统。保留所有权利。",
+                receipt_official: "正式收据",
+                receipt_thankyou: "谢谢！"
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+
+            // Update all elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+        }
+
+        // Apply language immediately
+        setLanguage(currentLang);
+
+        // --- DARK MODE ---
+        const darkToggle = document.getElementById('darkToggle');
+        const icon = darkToggle.querySelector('i');
+        const html = document.documentElement;
+
+        if(!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+        
+        const setTheme = (theme) => {
+            html.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            if(theme === 'dark') {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        };
+        setTheme(localStorage.getItem('theme'));
+
+        darkToggle.addEventListener('click', () => {
+            const current = localStorage.getItem('theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // --- EXCHANGE LOGIC ---
+        let latestExchange = null;
+        
+        const rates = {
+            usd_khr: () => Number(document.getElementById('usd_khr').value),
+            usd_thb: () => Number(document.getElementById('usd_thb').value),
+            khr_usd: () => Number(document.getElementById('khr_usd').value),
+            khr_thb: () => Number(document.getElementById('khr_thb').value),
+            thb_usd: () => Number(document.getElementById('thb_usd').value),
+            thb_khr: () => Number(document.getElementById('thb_khr').value)
+        };
+
+        function updateFlag(side) {
+            const select = document.getElementById(side + 'Currency');
+            const img = document.getElementById(side + 'Flag');
+            const code = select.options[select.selectedIndex].dataset.flag;
+            img.src = `https://flagcdn.com/${code}.svg`;
+        }
+
+        function swapCurrencies() {
+            const from = document.getElementById('fromCurrency');
+            const to = document.getElementById('toCurrency');
+            const tempVal = from.value;
+            from.value = to.value;
+            to.value = tempVal;
+            updateFlag('from');
+            updateFlag('to');
+            calculateReverse();
+        }
+
+        function calculateReverse() {
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+            const amount = parseFloat(document.getElementById('fromAmount').value) || 0;
+            const displayRate = document.getElementById('displayRate');
+
+            if (amount < 0) return;
+
+            let result = 0;
+            let currentRate = 0;
+
+            if (from === to) {
+                result = amount;
+                currentRate = 1;
+            } else if (from === 'USD' && to === 'KHR') { currentRate = rates.usd_khr(); result = amount * currentRate; }
+            else if (from === 'USD' && to === 'THB') { currentRate = rates.usd_thb(); result = amount * currentRate; }
+            else if (from === 'KHR' && to === 'USD') { currentRate = rates.khr_usd(); result = amount / currentRate; }
+            else if (from === 'KHR' && to === 'THB') { currentRate = rates.khr_thb(); result = amount / currentRate; }
+            else if (from === 'THB' && to === 'USD') { currentRate = rates.thb_usd(); result = amount / currentRate; }
+            else if (from === 'THB' && to === 'KHR') { currentRate = rates.thb_khr(); result = amount * currentRate; }
+
+            document.getElementById('toAmount').value = result.toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+
+            // Update UI Rate Display
+            let rateText = "";
+            if(from === 'USD' && to === 'KHR') rateText = `1 USD = ${currentRate} KHR`;
+            else if(from === 'KHR' && to === 'USD') rateText = `${currentRate} KHR = 1 USD`;
+            else rateText = `1 ${from} = ${currentRate.toFixed(2)} ${to}`;
+            
+            displayRate.innerText = rateText;
+        }
+
+        // Live Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleString('en-US', { 
+                weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
+            });
+        }, 1000);
+
+        // Initialize
+        updateFlag('from');
+        updateFlag('to');
+        calculateReverse();
+        document.getElementById('fromAmount').addEventListener('input', calculateReverse);
+
+        // --- BACKEND API ---
+        async function exchange() {
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+            const amount = parseFloat(document.getElementById('fromAmount').value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
+            let rate;
+            if (from === 'USD' && to === 'KHR') rate = rates.usd_khr();
+            else if (from === 'USD' && to === 'THB') rate = rates.usd_thb();
+            else if (from === 'KHR' && to === 'USD') rate = rates.khr_usd();
+            else if (from === 'KHR' && to === 'THB') rate = rates.khr_thb();
+            else if (from === 'THB' && to === 'USD') rate = rates.thb_usd();
+            else if (from === 'THB' && to === 'KHR') rate = rates.thb_khr();
+            else rate = 1;
+
+            const response = await fetch('/exchange', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({from, to, amount, rate})
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('toAmount').value = data.total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                
+                const actionsDiv = document.getElementById('actions');
+                actionsDiv.style.display = 'block';
+                actionsDiv.style.opacity = 0;
+                setTimeout(() => actionsDiv.style.opacity = 1, 50);
+
+                document.getElementById('downloadLink').href = data.pdf_url;
+                document.getElementById('saveStatus').innerText = '';
+
+                latestExchange = {
+                    from, to, amount, total: data.total, rate, op: data.op, pdf_url: data.pdf_url
+                };
+            } else {
+                alert("Error: " + data.error);
+            }
+        }
+
+        async function saveToTelegram() {
+            if (!latestExchange) return;
+            const btn = document.getElementById('saveTelegramBtn');
+            const status = document.getElementById('saveStatus');
+            const labelSpan = btn.querySelector('span'); // Get the text span
+            const originalText = labelSpan.innerText;
+            
+            btn.disabled = true;
+            labelSpan.innerText = '...';
+
+            const res = await fetch('/save_to_telegram', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(latestExchange)
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                status.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Saved!</span>';
+            } else {
+                status.innerHTML = `<span class="text-danger">${result.error}</span>`;
+            }
+            btn.disabled = false;
+            labelSpan.innerText = originalText;
+        }
+
+        function printNow() {
+            if (!latestExchange) return;
+
+            const receipt = document.getElementById('printReceipt');
+
+            const now = new Date();
+            document.getElementById('printDateTime').textContent = now.toLocaleString('en-US', {
+                dateStyle: 'medium', timeStyle: 'short'
+            });
+
+            document.getElementById('printDetails').innerHTML = `
+                <div style="font-size: 16px; margin-bottom: 5px;">${latestExchange.amount.toLocaleString()} ${latestExchange.from}</div>
+                <div>↓</div>
+                <div style="font-size: 18px; margin-top: 5px;">${latestExchange.total.toLocaleString()} ${latestExchange.to}</div>
+            `;
+
+            document.getElementById('printRate').textContent = `Rate: 1 ${latestExchange.from} = ${latestExchange.rate} ${latestExchange.to}`;
+            
+            // Force Visible for Print
+            receipt.style.display = 'block';
+            window.print();
+            receipt.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
