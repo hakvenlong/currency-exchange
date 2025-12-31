@@ -7,10 +7,11 @@ from fpdf import FPDF
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates') 
+
 # --- CONFIGURATION FOR VERCEL ---
-# Vercel only allows writing to /tmp
-DB_FILE = '/tmp/exchange.db' 
+# Database and Invoices must be in /tmp (Vercel Requirement)
+DB_FILE = '/tmp/exchange.db'
 INVOICE_FOLDER = '/tmp/invoices'
 
 if not os.path.exists(INVOICE_FOLDER):
