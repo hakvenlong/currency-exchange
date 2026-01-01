@@ -3,630 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DPK Exchange | Professional Portal</title>
-
+    <title>DPK Exchange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    
     <style>
-        :root {
-            --glass-bg: rgba(30, 30, 40, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --accent-color: #818cf8;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --card-radius: 24px;
-            --input-radius: 16px;
-        }
-
-        [data-bs-theme="light"] {
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(0, 0, 0, 0.05);
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-        }
-
-        body {
-            /* Priority: English Font -> Khmer -> Chinese */
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', 'Noto Sans SC', sans-serif;
-            background: #0f172a;
-            min-height: 100vh;
-            color: var(--text-main);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-blobs {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
-                        radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.15), transparent 25%);
-        }
-
-        /* Navbar */
-        .navbar-brand {
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Glass Cards */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            padding: 2rem;
-            transition: transform 0.3s ease;
-        }
-
-        /* Input Groups */
-        .currency-input-group {
-            background: rgba(255,255,255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--input-radius);
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            transition: border-color 0.3s;
-        }
-        [data-bs-theme="light"] .currency-input-group {
-            background: #f8fafc;
-            border-color: #e2e8f0;
-        }
-        .currency-input-group:focus-within {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .currency-select {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-right: 15px;
-            border-right: 1px solid var(--glass-border);
-            min-width: 140px;
-        }
-        .currency-select img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-        .currency-select select {
-            background: transparent; border: none; color: var(--text-main);
-            font-weight: 700; cursor: pointer; outline: none; width: 100%;
-        }
-        .currency-select select option { background: #1e293b; color: white; }
-        [data-bs-theme="light"] .currency-select select option { background: white; color: black; }
-
-        .amount-field {
-            flex: 1; background: transparent; border: none; color: var(--text-main);
-            font-size: 1.75rem; font-weight: 700; text-align: right; outline: none; padding-left: 15px; width: 100%;
-        }
+        :root { --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --accent-color: #818cf8; --text-main: #ffffff; }
+        [data-bs-theme="light"] { --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(0, 0, 0, 0.08); --text-main: #1e293b; }
         
-        /* Swap Button */
-        .swap-btn-container {
-            position: relative; height: 20px; display: flex; justify-content: center; align-items: center; z-index: 10;
-        }
-        .btn-swap {
-            width: 48px; height: 48px; border-radius: 50%; background: var(--text-main); color: #0f172a;
-            border: none; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease;
-        }
-        [data-bs-theme="light"] .btn-swap { background: #0f172a; color: white; }
-        .btn-swap:hover {
-            transform: rotate(180deg) scale(1.1); background: var(--accent-color); color: white;
-        }
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', 'Noto Sans SC', sans-serif; background: #0f172a; min-height: 100vh; color: var(--text-main); overflow-x: hidden; }
+        
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        .currency-input-group { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 14px; padding: 0.8rem; display: flex; align-items: center; margin-bottom: 1rem; }
+        .amount-field { background: transparent; border: none; color: var(--text-main); font-size: 1.5rem; font-weight: 700; text-align: right; width: 100%; outline: none; }
+        .currency-select select { background: transparent; border: none; color: var(--text-main); font-weight: 700; outline: none; margin-left: 8px; cursor: pointer; }
+        [data-bs-theme="light"] select option { background: white; color: black; }
+        select option { background: #1e293b; color: white; }
+        
+        .rate-input { background: transparent; border: 1px solid transparent; color: var(--text-main); font-weight: 700; text-align: right; width: 80px; padding: 2px 5px; border-radius: 6px; }
+        .rate-input:focus, .rate-input.editable { background: rgba(255,255,255,0.1); border-color: var(--accent-color); outline: none; }
+        
+        .custom-pills .nav-link { color: var(--text-main); border-radius: 12px; padding: 8px 16px; font-weight: 600; font-size: 0.9rem; }
+        .custom-pills .nav-link.active { background: var(--accent-color); color: white; }
+        .qc-pills { display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+        .qc-pills .nav-link { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; margin-right: 5px; }
+        .qc-pills .nav-link.active { background: var(--text-main); color: var(--accent-color); font-weight: 700; }
+        .filter-chip { cursor: pointer; border: 1px solid var(--glass-border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; margin-right: 5px; background: rgba(255,255,255,0.05); color: #94a3b8; }
+        .filter-chip.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-        /* Rate Cards (Mini) */
-        .rate-card-mini {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px;
-            padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .rate-input-sm {
-            background: transparent; border: none; border-bottom: 1px solid var(--glass-border);
-            color: var(--accent-color); font-weight: 600; width: 80px; text-align: right; padding: 2px 0;
-        }
-        .rate-input-sm:focus { outline: none; border-color: var(--accent-color); }
+        .sparkline { stroke-width: 2; fill: none; stroke-linecap: round; }
+        .trend-up { color: #10b981; stroke: #10b981; }
+        .trend-down { color: #ef4444; stroke: #ef4444; }
 
-        /* Action Buttons */
-        .btn-primary-gradient {
-            background: var(--primary-gradient); border: none; color: white; font-weight: 600;
-            padding: 14px; border-radius: var(--input-radius); width: 100%;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-        .btn-primary-gradient:hover { opacity: 0.9; transform: translateY(-2px); }
-        .btn-action {
-            border-radius: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center;
-            gap: 8px; height: 100%;
-        }
-
-        /* Nav Controls */
-        .nav-icon-btn {
-            cursor: pointer; width: 40px; height: 40px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.1); color: var(--text-main); transition: all 0.3s;
-            border: none;
-        }
-        .nav-icon-btn:hover { background: rgba(255,255,255,0.2); }
-
-        /* Dropdown Styles */
-        .dropdown-menu {
-            background: rgba(30, 30, 40, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-        }
-        [data-bs-theme="light"] .dropdown-menu { background: rgba(255,255,255,0.95); }
-        .dropdown-item { color: var(--text-main); font-weight: 500; }
-        .dropdown-item:hover { background: var(--accent-color); color: white; }
-
-        /* Print Styles */
         @media print {
-            body * { visibility: hidden; height: 0; overflow: hidden; }
-            #printReceipt, #printReceipt * { visibility: visible; height: auto; overflow: visible; }
-            #printReceipt {
-                display: block !important; position: absolute; left: 0; top: 0;
-                width: 80mm; margin: 0; padding: 10px;
-                background: white !important; color: black !important;
-                font-family: 'Courier New', monospace;
+            body * { visibility: hidden; } 
+            #printReceipt, #printReceipt * { visibility: visible; }
+            #printReceipt { 
+                display: block !important; 
+                position: absolute; left: 0; top: 0; width: 75mm; margin: 0; padding: 5px 0;
+                font-family: 'Noto Sans Khmer', sans-serif; background: white; color: black; font-size: 13px; line-height: 1.4; font-weight: 600;
             }
-            @page { size: auto; margin: 0; }
+            .receipt-header { text-align: center; font-weight: 800; font-size: 20px; text-transform: uppercase; }
+            .receipt-sub { text-align: center; font-size: 16px; margin-bottom: 5px; font-weight: bold; }
+            .receipt-line { border-top: 1px dashed #000; margin: 8px 0; opacity: 0.5; }
+            .receipt-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+            .receipt-label { font-size: 12px; color: #333; }
+            .receipt-val { font-weight: 700; font-size: 14px; }
+            .receipt-total { font-size: 22px; font-weight: 900; }
+            .receipt-footer { text-align: center; margin-top: 15px; font-size: 12px; }
+            @page { size: 80mm auto; margin: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="bg-blobs"></div>
-
-    <nav class="navbar navbar-expand-lg py-3">
-        <div class="container">
-            <a class="navbar-brand fs-3" href="#"><i class="fas fa-wallet me-2"></i>DPK Exchange</a>
-            
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted d-none d-md-block small me-2" id="liveClock">Loading...</span>
-
+    <nav class="navbar navbar-expand p-3">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold fs-4" href="#"><i class="fas fa-wallet me-2 text-primary"></i>DPK Exchange</a>
+            <div class="d-flex gap-2 align-items-center">
                 <div class="dropdown">
-                    <button class="nav-icon-btn" data-bs-toggle="dropdown" title="Change Language">
-                        <i class="fas fa-globe"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg">
-                        <li><a class="dropdown-item" href="#" onclick="setLanguage('en')">🇺🇸 English</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="setLanguage('km')">🇰🇭 ភាសាខ្មែរ</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="setLanguage('zh')">🇨🇳 中文</a></li>
+                    <button class="btn btn-dark rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-globe"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end bg-dark">
+                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('en')">🇺🇸 English</a></li>
+                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('km')">🇰🇭 ភាសាខ្មែរ</a></li>
+                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('zh')">🇨🇳 中文</a></li>
                     </ul>
                 </div>
-
-                <button class="nav-icon-btn" id="darkToggle" title="Toggle Theme">
-                    <i class="fas fa-sun"></i>
-                </button>
+                <button class="btn btn-dark rounded-circle" onclick="openHistory()" title="History"><i class="fas fa-history"></i></button>
+                <button class="btn btn-dark rounded-circle" id="darkToggle"><i class="fas fa-sun"></i></button>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-3 mb-5">
+    <div class="container py-3">
         <div class="row g-4">
-            
-            <div class="col-lg-7">
-                <div class="glass-card h-100 d-flex flex-column justify-content-center">
-                    <h2 class="mb-4 fw-bold" data-i18n="hero_title">Currency Exchange</h2>
-                    
-                    <div class="currency-input-group">
-                        <div class="currency-select">
-                            <img id="fromFlag" src="https://flagcdn.com/us.svg" alt="Flag">
-                            <select id="fromCurrency" onchange="updateFlag('from'); calculateReverse()">
-                                <option value="USD" data-flag="us">USD</option>
-                                <option value="KHR" data-flag="kh">KHR</option>
-                                <option value="THB" data-flag="th">THB</option>
-                            </select>
-                            <i class="fas fa-chevron-down fa-xs text-muted"></i>
-                        </div>
-                        <input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00">
-                    </div>
-
-                    <div class="swap-btn-container">
-                        <button class="btn-swap" onclick="swapCurrencies()">
-                            <i class="fas fa-arrow-down-up"></i>
-                        </button>
-                    </div>
-
-                    <div class="currency-input-group">
-                        <div class="currency-select">
-                            <img id="toFlag" src="https://flagcdn.com/kh.svg" alt="Flag">
-                            <select id="toCurrency" onchange="updateFlag('to'); calculateReverse()">
-                                <option value="KHR" data-flag="kh">KHR</option>
-                                <option value="USD" data-flag="us">USD</option>
-                                <option value="THB" data-flag="th">THB</option>
-                            </select>
-                            <i class="fas fa-chevron-down fa-xs text-muted"></i>
-                        </div>
-                        <input type="text" id="toAmount" class="amount-field" readonly placeholder="0.00">
-                    </div>
-
-                    <div class="mt-4">
-                        <div class="d-flex justify-content-between text-muted mb-2 small">
-                            <span data-i18n="label_rate">Current Rate</span>
-                            <span id="displayRate">1 USD = 4008 KHR</span>
-                        </div>
-                        <button onclick="exchange()" class="btn-primary-gradient fs-5 shadow-lg">
-                            <span data-i18n="btn_process">Process Transaction</span> <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    </div>
-
-                    <div id="actions" class="mt-4 pt-3 border-top border-secondary border-opacity-25" style="display:none;">
-                        <div class="row g-2">
-                            <div class="col-4">
-                                <a id="downloadLink" href="#" target="_blank" class="btn btn-outline-light btn-action w-100">
-                                    <i class="fas fa-file-pdf text-danger"></i> <span data-i18n="btn_pdf">PDF</span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <button onclick="printNow()" class="btn btn-outline-light btn-action w-100">
-                                    <i class="fas fa-print text-warning"></i> <span data-i18n="btn_print">Print</span>
-                                </button>
-                            </div>
-                            <div class="col-4">
-                                <button id="saveTelegramBtn" onclick="saveToTelegram()" class="btn btn-outline-light btn-action w-100">
-                                    <i class="fab fa-telegram text-info"></i> <span data-i18n="btn_save">Save</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="saveStatus" class="text-center mt-2 small fw-bold"></div>
+            <div class="col-lg-6">
+                <div class="glass-card h-100">
+                    <h4 class="mb-4 fw-bold" data-i18n="new_tx">New Transaction</h4>
+                    <div class="input-group mb-3"><span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white"><i class="fas fa-user"></i></span><input type="text" id="customerName" class="form-control bg-transparent text-white border-secondary border-opacity-25" placeholder="Customer Name (Optional)"></div>
+                    <div class="currency-input-group"><img id="fromFlag" src="https://flagcdn.com/us.svg" width="28"><div class="currency-select"><select id="fromCurrency" onchange="updateUI()"><option value="USD" data-flag="us">USD</option><option value="KHR" data-flag="kh">KHR</option><option value="THB" data-flag="th">THB</option></select></div><input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00"></div>
+                    <div class="text-center my-2"><i class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon" onclick="swap()" style="cursor:pointer"></i></div>
+                    <div class="currency-input-group"><img id="toFlag" src="https://flagcdn.com/kh.svg" width="28"><div class="currency-select"><select id="toCurrency" onchange="updateUI()"><option value="KHR" data-flag="kh">KHR</option><option value="USD" data-flag="us">USD</option><option value="THB" data-flag="th">THB</option></select></div><input type="text" id="toAmount" class="amount-field" readonly></div>
+                    <div class="d-flex justify-content-between mt-3 text-muted small"><span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span></div>
+                    <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg"><span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i></button>
+                    <div id="actionButtons" class="row mt-3 g-2" style="display:none">
+                        <div class="col-4"><a id="pdfLink" class="btn btn-outline-light w-100 btn-sm"><i class="fas fa-file-pdf"></i> PDF</a></div>
+                        <div class="col-4"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
+                        <div class="col-4"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 btn-sm"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
-                <div class="glass-card h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <h4 class="fw-bold m-0"><i class="fas fa-chart-line me-2 text-primary"></i><span data-i18n="admin_title">Live Rates</span></h4>
-                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25" data-i18n="admin_badge">Admin</span>
+            <div class="col-lg-6">
+                <div class="glass-card text-center mb-3 py-3">
+                    <h6 class="text-muted text-uppercase small mb-1" data-i18n="people_count">People Exchanged Today</h6>
+                    <h1 class="display-5 fw-bold text-success mb-0" id="peopleCount">...</h1>
+                </div>
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <ul class="nav nav-pills custom-pills" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#content-rates"><i class="fas fa-chart-line me-2"></i>Live Rates</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#content-convert"><i class="fas fa-calculator me-2"></i>Quick Convert</button></li>
+                        </ul>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleEditRates()" id="editRatesBtn"><i class="fas fa-pen me-1"></i> Edit</button>
                     </div>
-
-                    <div class="rate-grid">
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/us.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/kh.svg" width="20">
-                                <span class="fw-bold small ms-1">USD/KHR</span>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="content-rates">
+                            <div class="table-responsive">
+                                <table class="table table-borderless rate-table align-middle m-0 text-white">
+                                    <thead class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th class="text-end">Rate</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/KHR</small></div></td><td class="text-end"><input id="usd_khr" type="number" class="rate-input" value="4008" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/THB</small></div></td><td class="text-end"><input id="usd_thb" type="number" class="rate-input" value="31.44" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/USD</small></div></td><td class="text-end"><input id="khr_usd" type="number" class="rate-input" value="4021" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/THB</small></div></td><td class="text-end"><input id="khr_thb" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/USD</small></div></td><td class="text-end"><input id="thb_usd" type="number" class="rate-input" value="31.82" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/KHR</small></div></td><td class="text-end"><input id="thb_khr" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <input id="usd_khr" type="number" class="rate-input-sm" value="4008" onchange="calculateReverse()">
                         </div>
-
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/us.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/th.svg" width="20">
-                                <span class="fw-bold small ms-1">USD/THB</span>
+                        <div class="tab-pane fade" id="content-convert">
+                            <div class="p-2">
+                                <ul class="nav nav-pills qc-pills mb-3" id="qcTabs" role="tablist">
+                                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qc-usd-khr">USD/KHR</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-usd-thb">USD/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-usd">KHR/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-thb">KHR/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-usd">THB/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-khr">THB/KHR</button></li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="qc-usd-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-khr"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-usd-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-thb"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-khr-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-usd"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-khr-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-thb"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-thb-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-usd"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-thb-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-khr"></tbody></table></div>
+                                </div>
                             </div>
-                            <input id="usd_thb" type="number" class="rate-input-sm" value="31.44" step="0.01" onchange="calculateReverse()">
                         </div>
-
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/kh.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/us.svg" width="20">
-                                <span class="fw-bold small ms-1">KHR/USD</span>
-                            </div>
-                            <input id="khr_usd" type="number" class="rate-input-sm" value="4021" onchange="calculateReverse()">
-                        </div>
-
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/kh.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/th.svg" width="20">
-                                <span class="fw-bold small ms-1">KHR/THB</span>
-                            </div>
-                            <input id="khr_thb" type="number" class="rate-input-sm" value="127.6" step="0.1" onchange="calculateReverse()">
-                        </div>
-
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/th.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/us.svg" width="20">
-                                <span class="fw-bold small ms-1">THB/USD</span>
-                            </div>
-                            <input id="thb_usd" type="number" class="rate-input-sm" value="31.82" step="0.01" onchange="calculateReverse()">
-                        </div>
-
-                        <div class="rate-card-mini">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="https://flagcdn.com/th.svg" width="20"> <i class="fas fa-arrow-right fa-xs text-muted"></i> <img src="https://flagcdn.com/kh.svg" width="20">
-                                <span class="fw-bold small ms-1">THB/KHR</span>
-                            </div>
-                            <input id="thb_khr" type="number" class="rate-input-sm" value="127.60" step="0.01" onchange="calculateReverse()">
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info bg-transparent border-info text-info small mt-3">
-                        <i class="fas fa-info-circle me-1"></i> <span data-i18n="info_update">Rate changes update the converter immediately.</span>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <footer class="text-center text-muted mt-5 small">
-            <p data-i18n="footer">&copy; 2025 DPK Exchange System. All rights reserved.</p>
-        </footer>
     </div>
 
-    <div id="printReceipt" style="display:none; font-family: 'Courier New', monospace; padding: 10px;">
-        <div class="receipt-header" style="text-align:center; font-weight:bold; font-size:18px;">DPK Exchange</div>
-        <div style="text-align: center; font-size: 12px; margin-bottom: 5px;">------------------------</div>
-        <div id="printDateTime" style="text-align: center; font-size: 12px;"></div>
-        <div style="text-align: center; font-size: 12px; margin-bottom: 5px;">------------------------</div>
-        <div id="receiptLabel" style="text-align: center; font-size: 12px;" data-i18n="receipt_official">Official Receipt</div>
-        <div id="printDetails" style="font-size: 14px; font-weight: bold; margin: 10px 0;"></div>
-        <div id="printRate" style="font-size: 12px;"></div>
-        <div style="text-align: center; font-size: 12px; margin-top: 5px;">------------------------</div>
-        <div style="text-align: center; font-size: 12px; margin-top: 10px;" data-i18n="receipt_thankyou">Thank you!</div>
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content glass-card p-0 overflow-hidden border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="fw-bold" data-i18n="history_title">History & Filters</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Search..." onkeyup="searchHistory()" style="width: 200px;">
+                            <div class="vr bg-secondary"></div>
+                            <select id="timeFilter" class="form-select form-select-sm bg-dark text-white w-auto" onchange="loadHistory()"><option value="all">All</option><option value="week">Week</option><option value="month">Month</option></select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-danger" onclick="deleteSelected()">Delete Selected</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAll()">Delete All</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 50vh;">
+                        <table class="table table-dark table-sm align-middle mb-0">
+                            <thead><tr class="text-secondary"><th width="30"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th><th data-i18n="col_time">Time</th><th data-i18n="col_cust">Customer</th><th>In</th><th>Out</th><th data-i18n="rate">Rate</th><th data-i18n="col_action">Action</th></tr></thead>
+                            <tbody id="historyList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border-0">
+                <h5 class="fw-bold mb-3">Edit Transaction</h5><input type="hidden" id="editId"><input type="hidden" id="editFrom"><input type="hidden" id="editTo">
+                <div class="mb-2"><label class="small text-muted">Customer</label><input type="text" id="editCust" class="form-control bg-dark text-white border-secondary"></div>
+                <div class="row g-2 mb-3"><div class="col-6"><label class="small text-muted">Amount</label><input type="number" id="editAmount" class="form-control bg-dark text-white border-secondary"></div><div class="col-6"><label class="small text-muted">Rate</label><input type="number" id="editRate" class="form-control bg-dark text-white border-secondary"></div></div>
+                <button onclick="saveEdit()" class="btn btn-success w-100">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="printReceipt" style="display:none">
+        <div class="receipt-header">DPK EXCHANGE</div>
+        <div class="receipt-sub">ប្តូរប្រាក់</div>
+        <div class="receipt-line">-</div>
+        <div style="text-align:center; font-size: 11px;" id="rDate"></div>
+        <div class="receipt-line">-</div>
+        <div class="receipt-row"><span class="receipt-label">Received (ទទួល):</span><span id="rIn" class="receipt-val"></span></div>
+        <div class="receipt-row"><span class="receipt-label">Rate (អត្រា):</span><span id="rRate" class="receipt-val"></span></div>
+        <div class="receipt-line">-</div>
+        <div class="receipt-row" style="margin-top:5px; align-items:flex-end;"><span style="font-size:14px; font-weight:bold;">TOTAL (សរុប):</span><span id="rOut" class="receipt-total"></span></div>
+        <div class="receipt-line">-</div>
+        <div class="receipt-footer">សូមពិនិត្យឱ្យបានត្រឹមត្រូវមុនចាកចេញ<br><span style="font-size:10px; opacity:0.7;">Thank You!</span></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // --- TRANSLATION DATA ---
-        const translations = {
-            en: {
-                hero_title: "Currency Exchange",
-                label_rate: "Current Rate",
-                btn_process: "Process Transaction",
-                btn_pdf: "PDF",
-                btn_print: "Print",
-                btn_save: "Save",
-                admin_title: "Live Rates",
-                admin_badge: "Admin",
-                info_update: "Rate changes update the converter immediately.",
-                footer: "© 2025 DPK Exchange System. All rights reserved.",
-                receipt_official: "Official Receipt",
-                receipt_thankyou: "Thank you!"
-            },
-            km: {
-                hero_title: "ការប្តូរប្រាក់",
-                label_rate: "អត្រាប្តូរប្រាក់បច្ចុប្បន្ន",
-                btn_process: "ប្រតិបត្តិការប្តូរប្រាក់",
-                btn_pdf: "ឯកសារ PDF",
-                btn_print: "បោះពុម្ព",
-                btn_save: "រក្សាទុក",
-                admin_title: "តារាងអត្រាប្តូរប្រាក់",
-                admin_badge: "អ្នកគ្រប់គ្រង",
-                info_update: "ការផ្លាស់ប្តូរអត្រានឹងធ្វើបច្ចុប្បន្នភាពភ្លាមៗ។",
-                footer: "រក្សាសិទ្ធិគ្រប់យ៉ាង © ២០២៥ DPK Exchange",
-                receipt_official: "វិក្កយបត្រផ្លូវការ",
-                receipt_thankyou: "សូមពិនិត្យមុនចាកចេញ សូមអរគុណ!"
-            },
-            zh: {
-                hero_title: "货币兑换",
-                label_rate: "当前汇率",
-                btn_process: "处理交易",
-                btn_pdf: "PDF下载",
-                btn_print: "打印",
-                btn_save: "保存",
-                admin_title: "实时汇率",
-                admin_badge: "管理员",
-                info_update: "汇率更改将立即更新转换器。",
-                footer: "© 2025 DPK 兑换系统。保留所有权利。",
-                receipt_official: "正式收据",
-                receipt_thankyou: "谢谢！"
-            }
-        };
+        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "People Exchanged Today", unique_tx: "Transactions", history_title: "History & Filters", filter_all: "All Time", filter_week: "This Week", filter_month: "This Month", col_time: "Time", col_cust: "Customer", col_action: "Action", placeholder_cust: "Customer Name (Optional)" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "ចំនួនអ្នកប្តូរប្រាក់ថ្ងៃនេះ", unique_tx: "ប្រតិបត្តិការ", history_title: "ប្រវត្តិ & ស្វែងរក", filter_all: "គ្រប់ពេល", filter_week: "សប្តាហ៍នេះ", filter_month: "ខែនេះ", col_time: "ម៉ោង", col_cust: "អតិថិជន", col_action: "សកម្មភាព", placeholder_cust: "ឈ្មោះអតិថិជន (មិនបង្ខំ)" }, zh: { new_tx: "新交易", rate: "汇率", btn_process: "处理", btn_print: "打印", btn_save: "保存", people_count: "今日兑换人数", unique_tx: "交易笔数", history_title: "历史记录 & 筛选", filter_all: "全部时间", filter_week: "本周", filter_month: "本月", col_time: "时间", col_cust: "客户", col_action: "操作", placeholder_cust: "客户姓名 (可选)" } };
+        function setLang(lang) { localStorage.setItem('lang', lang); document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if(i18n[lang][k]) el.innerText = i18n[lang][k]; }); document.getElementById('customerName').placeholder = i18n[lang]['placeholder_cust']; }
+        function toggleEditRates() { const inputs = document.querySelectorAll('.rate-input'); const btn = document.getElementById('editRatesBtn'); const isEditing = !inputs[0].readOnly; inputs.forEach(input => { input.readOnly = isEditing; if(!isEditing) input.classList.add('editable'); else input.classList.remove('editable'); }); if(!isEditing) { btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-success'); btn.innerHTML = '<i class="fas fa-check me-1"></i> Done'; } else { btn.classList.add('btn-outline-secondary'); btn.classList.remove('btn-success'); btn.innerHTML = '<i class="fas fa-pen me-1"></i> Edit'; } }
+        function updateQuickTable() { const pairs = [{ id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '៛' }, { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '฿' }, { id: 'khr-usd', rateId: 'khr_usd', steps: [4000, 10000, 20000, 50000, 100000, 500000], op: '/', s: '៛', t: '$' }, { id: 'khr-thb', rateId: 'khr_thb', steps: [1000, 5000, 10000, 20000, 50000, 100000], op: '/', s: '៛', t: '฿' }, { id: 'thb-usd', rateId: 'thb_usd', steps: [100, 500, 1000, 2000, 5000, 10000], op: '/', s: '฿', t: '$' }, { id: 'thb-khr', rateId: 'thb_khr', steps: [20, 50, 100, 500, 1000, 5000], op: '*', s: '฿', t: '៛' }]; pairs.forEach(p => { const r = parseFloat(document.getElementById(p.rateId).value) || 1; let html = `<tr class="table-active"><th>${p.s}</th><th>${p.t}</th></tr>`; p.steps.forEach(amt => { let res = (p.op === '*') ? amt * r : amt / r; let resStr = (res < 10) ? res.toFixed(2) : Math.round(res).toLocaleString(); html += `<tr><td>${amt.toLocaleString()}</td><td class="text-success fw-bold">${resStr}</td></tr>`; }); document.getElementById(`table-${p.id}`).innerHTML = html; }); }
 
-        let currentLang = localStorage.getItem('lang') || 'en';
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('lang', lang);
-
-            // Update all elements with data-i18n
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) {
-                    el.innerText = translations[lang][key];
-                }
-            });
-        }
-
-        // Apply language immediately
-        setLanguage(currentLang);
-
-        // --- DARK MODE ---
-        const darkToggle = document.getElementById('darkToggle');
-        const icon = darkToggle.querySelector('i');
-        const html = document.documentElement;
-
-        if(!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+        let currentPairFilter = 'all'; let latestTx = null; const SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'};
+        function updateUI() { const f = document.getElementById('fromCurrency').value; const t = document.getElementById('toCurrency').value; const amt = parseFloat(document.getElementById('fromAmount').value) || 0; const fImg = document.getElementById('fromCurrency').selectedOptions[0].dataset.flag; const tImg = document.getElementById('toCurrency').selectedOptions[0].dataset.flag; document.getElementById('fromFlag').src = `https://flagcdn.com/${fImg}.svg`; document.getElementById('toFlag').src = `https://flagcdn.com/${tImg}.svg`; let rate = 1; let total = 0; if(f === t) total = amt; else { const directEl = document.getElementById(`${f.toLowerCase()}_${t.toLowerCase()}`); if(directEl) { rate = parseFloat(directEl.value); if((f=='USD'&&t=='KHR') || (f=='USD'&&t=='THB') || (f=='THB'&&t=='KHR')) total = amt * rate; else total = amt / rate; } } document.getElementById('toAmount').value = total.toLocaleString('en-US', {minimumFractionDigits: 2}); document.getElementById('displayRate').innerText = `1 ${f} = ${rate} ${t}`; }
+        function swap() { const f = document.getElementById('fromCurrency'), t = document.getElementById('toCurrency'); [f.value, t.value] = [t.value, f.value]; const icon = document.querySelector('.swap-icon'); icon.classList.add('rotate'); setTimeout(() => icon.classList.remove('rotate'), 500); updateUI(); }
+        async function processExchange() { const data = { from: document.getElementById('fromCurrency').value, to: document.getElementById('toCurrency').value, amount: document.getElementById('fromAmount').value, rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1], customer: document.getElementById('customerName').value }; const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); const json = await res.json(); if(json.success) { document.getElementById('actionButtons').style.display = 'flex'; document.getElementById('pdfLink').href = json.pdf_url; latestTx = {...data, total: json.total, op: json.op}; updateStats(); } }
+        async function updateStats() { const res = await fetch('/stats'); const d = await res.json(); document.getElementById('peopleCount').innerText = d.count; }
+        function setPairFilter(pair, el) { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); currentPairFilter = pair; loadHistory(); }
+        async function loadHistory() { const period = document.getElementById('timeFilter').value; const res = await fetch(`/history?period=${period}&pair=${currentPairFilter}`); const list = await res.json(); const tbody = document.getElementById('historyList'); tbody.innerHTML = ''; list.forEach(item => { const safeJson = JSON.stringify(item).replace(/"/g, '&quot;'); tbody.innerHTML += `<tr><td><input type="checkbox" class="tx-checkbox" value="${item.id}"></td><td><div class="small text-white">${item.date}</div><div class="text-muted" style="font-size:10px">${item.time}</div></td><td><div class="fw-bold">${item.customer || '-'}</div></td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td class="small text-muted">${item.rate}</td><td><button class="btn btn-sm btn-outline-secondary border-0 text-warning" onclick="openEdit(${safeJson})"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-outline-secondary border-0 text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; }); searchHistory(); }
+        function searchHistory() { const term = document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('#historyList tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; }); }
+        function toggleSelectAll() { const master = document.getElementById('selectAll'); document.querySelectorAll('.tx-checkbox').forEach(cb => { if(cb.closest('tr').style.display !== 'none') cb.checked = master.checked; }); }
+        async function deleteSelected() { const selected = Array.from(document.querySelectorAll('.tx-checkbox:checked')).map(cb => cb.value); if(selected.length === 0) return alert('Select items first'); if(!confirm(`Delete ${selected.length} items?`)) return; await fetch('/delete_multiple', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ids: selected}) }); loadHistory(); updateStats(); }
+        async function deleteAll() { if(!confirm('DANGER: Delete ALL history permanently?')) return; await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); }
+        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
+        async function deleteTx(id) { if(!confirm('Delete transaction?')) return; await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); }
+        function openEdit(item) { document.getElementById('editId').value = item.id; document.getElementById('editFrom').value = item.from; document.getElementById('editTo').value = item.to; document.getElementById('editCust').value = item.customer; document.getElementById('editAmount').value = item.in; document.getElementById('editRate').value = item.rate; new bootstrap.Modal(document.getElementById('editModal')).show(); }
+        async function saveEdit() { const data = { id: document.getElementById('editId').value, from: document.getElementById('editFrom').value, to: document.getElementById('editTo').value, customer: document.getElementById('editCust').value, amount: document.getElementById('editAmount').value, rate: document.getElementById('editRate').value }; await fetch('/update_transaction', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); bootstrap.Modal.getInstance(document.getElementById('editModal')).hide(); loadHistory(); updateStats(); }
         
-        const setTheme = (theme) => {
-            html.setAttribute('data-bs-theme', theme);
-            localStorage.setItem('theme', theme);
-            if(theme === 'dark') {
-                icon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-            }
-        };
-        setTheme(localStorage.getItem('theme'));
-
-        darkToggle.addEventListener('click', () => {
-            const current = localStorage.getItem('theme');
-            setTheme(current === 'dark' ? 'light' : 'dark');
-        });
-
-        // --- EXCHANGE LOGIC ---
-        let latestExchange = null;
+        function printReceipt() { 
+            if(!latestTx) return; 
+            const symOut = SYMBOLS[latestTx.to] || latestTx.to;
+            document.getElementById('rDate').innerText = new Date().toLocaleString(); 
+            document.getElementById('rIn').innerText = `${parseFloat(latestTx.amount).toLocaleString()} ${latestTx.from}`; 
+            document.getElementById('rRate').innerText = latestTx.rate; 
+            document.getElementById('rOut').innerText = `${parseFloat(latestTx.total).toLocaleString()} ${symOut}`; 
+            
+            const r = document.getElementById('printReceipt'); 
+            r.style.display = 'block'; 
+            window.print(); 
+            r.style.display = 'none'; 
+        }
         
-        const rates = {
-            usd_khr: () => Number(document.getElementById('usd_khr').value),
-            usd_thb: () => Number(document.getElementById('usd_thb').value),
-            khr_usd: () => Number(document.getElementById('khr_usd').value),
-            khr_thb: () => Number(document.getElementById('khr_thb').value),
-            thb_usd: () => Number(document.getElementById('thb_usd').value),
-            thb_khr: () => Number(document.getElementById('thb_khr').value)
-        };
+        async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); alert('Sent to Telegram!'); }
 
-        function updateFlag(side) {
-            const select = document.getElementById(side + 'Currency');
-            const img = document.getElementById(side + 'Flag');
-            const code = select.options[select.selectedIndex].dataset.flag;
-            img.src = `https://flagcdn.com/${code}.svg`;
-        }
-
-        function swapCurrencies() {
-            const from = document.getElementById('fromCurrency');
-            const to = document.getElementById('toCurrency');
-            const tempVal = from.value;
-            from.value = to.value;
-            to.value = tempVal;
-            updateFlag('from');
-            updateFlag('to');
-            calculateReverse();
-        }
-
-        function calculateReverse() {
-            const from = document.getElementById('fromCurrency').value;
-            const to = document.getElementById('toCurrency').value;
-            const amount = parseFloat(document.getElementById('fromAmount').value) || 0;
-            const displayRate = document.getElementById('displayRate');
-
-            if (amount < 0) return;
-
-            let result = 0;
-            let currentRate = 0;
-
-            if (from === to) {
-                result = amount;
-                currentRate = 1;
-            } else if (from === 'USD' && to === 'KHR') { currentRate = rates.usd_khr(); result = amount * currentRate; }
-            else if (from === 'USD' && to === 'THB') { currentRate = rates.usd_thb(); result = amount * currentRate; }
-            else if (from === 'KHR' && to === 'USD') { currentRate = rates.khr_usd(); result = amount / currentRate; }
-            else if (from === 'KHR' && to === 'THB') { currentRate = rates.khr_thb(); result = amount / currentRate; }
-            else if (from === 'THB' && to === 'USD') { currentRate = rates.thb_usd(); result = amount / currentRate; }
-            else if (from === 'THB' && to === 'KHR') { currentRate = rates.thb_khr(); result = amount * currentRate; }
-
-            document.getElementById('toAmount').value = result.toLocaleString('en-US', {
-                minimumFractionDigits: 2, maximumFractionDigits: 2
-            });
-
-            // Update UI Rate Display
-            let rateText = "";
-            if(from === 'USD' && to === 'KHR') rateText = `1 USD = ${currentRate} KHR`;
-            else if(from === 'KHR' && to === 'USD') rateText = `${currentRate} KHR = 1 USD`;
-            else rateText = `1 ${from} = ${currentRate.toFixed(2)} ${to}`;
-            
-            displayRate.innerText = rateText;
-        }
-
-        // Live Clock
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('liveClock').innerText = now.toLocaleString('en-US', { 
-                weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
-            });
-        }, 1000);
-
-        // Initialize
-        updateFlag('from');
-        updateFlag('to');
-        calculateReverse();
-        document.getElementById('fromAmount').addEventListener('input', calculateReverse);
-
-        // --- BACKEND API ---
-        async function exchange() {
-            const from = document.getElementById('fromCurrency').value;
-            const to = document.getElementById('toCurrency').value;
-            const amount = parseFloat(document.getElementById('fromAmount').value);
-
-            if (isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid amount");
-                return;
-            }
-
-            let rate;
-            if (from === 'USD' && to === 'KHR') rate = rates.usd_khr();
-            else if (from === 'USD' && to === 'THB') rate = rates.usd_thb();
-            else if (from === 'KHR' && to === 'USD') rate = rates.khr_usd();
-            else if (from === 'KHR' && to === 'THB') rate = rates.khr_thb();
-            else if (from === 'THB' && to === 'USD') rate = rates.thb_usd();
-            else if (from === 'THB' && to === 'KHR') rate = rates.thb_khr();
-            else rate = 1;
-
-            const response = await fetch('/exchange', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({from, to, amount, rate})
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                document.getElementById('toAmount').value = data.total.toLocaleString('en-US', {minimumFractionDigits: 2});
-                
-                const actionsDiv = document.getElementById('actions');
-                actionsDiv.style.display = 'block';
-                actionsDiv.style.opacity = 0;
-                setTimeout(() => actionsDiv.style.opacity = 1, 50);
-
-                document.getElementById('downloadLink').href = data.pdf_url;
-                document.getElementById('saveStatus').innerText = '';
-
-                latestExchange = {
-                    from, to, amount, total: data.total, rate, op: data.op, pdf_url: data.pdf_url
-                };
-            } else {
-                alert("Error: " + data.error);
-            }
-        }
-
-        async function saveToTelegram() {
-            if (!latestExchange) return;
-            const btn = document.getElementById('saveTelegramBtn');
-            const status = document.getElementById('saveStatus');
-            const labelSpan = btn.querySelector('span'); // Get the text span
-            const originalText = labelSpan.innerText;
-            
-            btn.disabled = true;
-            labelSpan.innerText = '...';
-
-            const res = await fetch('/save_to_telegram', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(latestExchange)
-            });
-            const result = await res.json();
-
-            if (result.success) {
-                status.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Saved!</span>';
-            } else {
-                status.innerHTML = `<span class="text-danger">${result.error}</span>`;
-            }
-            btn.disabled = false;
-            labelSpan.innerText = originalText;
-        }
-
-        function printNow() {
-            if (!latestExchange) return;
-
-            const receipt = document.getElementById('printReceipt');
-
-            const now = new Date();
-            document.getElementById('printDateTime').textContent = now.toLocaleString('en-US', {
-                dateStyle: 'medium', timeStyle: 'short'
-            });
-
-            document.getElementById('printDetails').innerHTML = `
-                <div style="font-size: 16px; margin-bottom: 5px;">${latestExchange.amount.toLocaleString()} ${latestExchange.from}</div>
-                <div>↓</div>
-                <div style="font-size: 18px; margin-top: 5px;">${latestExchange.total.toLocaleString()} ${latestExchange.to}</div>
-            `;
-
-            document.getElementById('printRate').textContent = `Rate: 1 ${latestExchange.from} = ${latestExchange.rate} ${latestExchange.to}`;
-            
-            // Force Visible for Print
-            receipt.style.display = 'block';
-            window.print();
-            receipt.style.display = 'none';
-        }
+        document.getElementById('fromAmount').addEventListener('input', updateUI);
+        updateUI(); updateStats(); setLang(localStorage.getItem('lang') || 'en'); updateQuickTable();
+        document.getElementById('darkToggle').addEventListener('click', () => { const h = document.documentElement; h.setAttribute('data-bs-theme', h.getAttribute('data-bs-theme')==='dark'?'light':'dark'); });
     </script>
 </body>
 </html>
