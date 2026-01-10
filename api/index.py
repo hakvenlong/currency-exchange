@@ -5,6 +5,7 @@ import sqlite3
 import requests
 import platform
 from fpdf import FPDF
+from fpdf.enums import XPos, YPos
 
 app = Flask(__name__, template_folder='../templates')
 
@@ -23,6 +24,7 @@ if not os.path.exists(INVOICE_FOLDER):
 
 SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'}
 
+# --- DATABASE SETUP & MIGRATION ---
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -32,24 +34,38 @@ def init_db():
                   from_curr TEXT, to_curr TEXT, 
                   amount_in REAL, amount_out REAL, 
                   rate REAL, op TEXT,
-                  customer_name TEXT, market TEXT)''')
+                  customer_name TEXT, 
+                  phone TEXT, 
+                  address TEXT,
+                  market TEXT)''')
+    try:
+        c.execute("SELECT phone FROM transactions LIMIT 1")
+    except sqlite3.OperationalError:
+        try:
+            c.execute("ALTER TABLE transactions ADD COLUMN phone TEXT")
+            c.execute("ALTER TABLE transactions ADD COLUMN address TEXT")
+        except: pass
     conn.commit()
     conn.close()
 
 init_db()
 
-# --- HELPERS ---
+# --- DATABASE HELPERS ---
 def log_transaction(data):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     now = datetime.datetime.now()
     c.execute("""
         INSERT INTO transactions 
-        (date, timestamp, from_curr, to_curr, amount_in, amount_out, rate, op, customer_name, market) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (date, timestamp, from_curr, to_curr, amount_in, amount_out, rate, op, customer_name, phone, address, market) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), 
           data['from'], data['to'], data['amount'], data['total'], 
-          data['rate'], data['op'], data.get('customer', ''), ''))
+          data['rate'], data['op'], 
+          data.get('customer', ''), 
+          data.get('phone', ''), 
+          data.get('address', ''), 
+          ''))
     conn.commit()
     conn.close()
 
@@ -78,7 +94,7 @@ def get_filtered_history(period='all', pair='all'):
         query += " AND from_curr = ? AND to_curr = ?"
         params.extend([f, t])
 
-    query += " ORDER BY id DESC LIMIT 200" # Increased limit for search
+    query += " ORDER BY id DESC LIMIT 200"
     c.execute(query, params)
     rows = c.fetchall()
     conn.close()
@@ -88,63 +104,94 @@ def get_daily_stats():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    
-    # Get total volume per currency
     c.execute("SELECT from_curr, amount_in, to_curr, amount_out FROM transactions WHERE date = ?", (today,))
     rows = c.fetchall()
-    
-    # --- FIX: SMART PEOPLE COUNTING ---
-    # 1. Count Guests (Empty Name) as individual people
     c.execute("SELECT COUNT(*) FROM transactions WHERE date = ? AND (customer_name IS NULL OR customer_name = '')", (today,))
     guest_count = c.fetchone()[0]
-    
-    # 2. Count Unique Named Customers (e.g. "John" doing 5 txns counts as 1 person)
     c.execute("SELECT COUNT(DISTINCT customer_name) FROM transactions WHERE date = ? AND customer_name != ''", (today,))
     named_count = c.fetchone()[0]
-    
     total_people = guest_count + named_count
-    # ----------------------------------
-
     conn.close()
-    
     stats = {'USD': {'in': 0, 'out': 0}, 'KHR': {'in': 0, 'out': 0}, 'THB': {'in': 0, 'out': 0}}
     for r in rows:
         if r[0] in stats: stats[r[0]]['in'] += r[1]
         if r[2] in stats: stats[r[2]]['out'] += r[3]
-        
     return stats, total_people
+
 # --- PDF GENERATOR ---
 def generate_pdf_invoice(data):
     now = datetime.datetime.now()
-    filename = f"DPK_Invoice_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
-    if not os.path.exists(INVOICE_FOLDER): os.makedirs(INVOICE_FOLDER)
+    filename = f"Receipt_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
     path = os.path.join(INVOICE_FOLDER, filename)
     
-    pdf = FPDF(format='A5')
+    pdf = FPDF(format=(80, 200))
+    pdf.set_margins(5, 5, 5)
     pdf.add_page()
-    pdf.set_font("Helvetica", 'B', 20)
-    pdf.cell(0, 12, 'DPK Exchange', ln=1, align='C')
-    pdf.set_font("Helvetica", '', 10)
-    pdf.cell(0, 8, 'Official Receipt', ln=1, align='C')
-    pdf.cell(0, 8, f"Date: {now.strftime('%d %B %Y %H:%M:%S')}", ln=1, align='C')
     
-    if data.get('customer'):
-        pdf.ln(2)
-        pdf.cell(0, 8, f"Customer: {data['customer']}", ln=1, align='C')
-
-    pdf.ln(5)
-    pdf.line(15, pdf.get_y(), 133, pdf.get_y())
-    pdf.ln(5)
+    # --- HEADER ---
+    pdf.set_font("Helvetica", 'B', 16)
+    pdf.cell(0, 8, 'DPK EXCHANGE', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    
+    pdf.set_font("Helvetica", '', 9)
+    pdf.cell(0, 5, 'Money Exchange & Transfer', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 5, 'Tel: 012 53 53 24, 012 80 94 25', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 5, '78 78', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    
+    pdf.ln(3)
     pdf.set_font("Helvetica", 'B', 14)
-    pdf.cell(0, 10, 'Exchange Details', ln=1, align='C')
-    pdf.set_font("Helvetica", '', 12)
-    pdf.cell(0, 10, f"From: {data['amount']:,.2f} {data['from']}", ln=1)
-    pdf.cell(0, 10, f"To:     {data['total']:,.2f} {data['to']}", ln=1)
-    pdf.set_font("Helvetica", 'B', 12)
-    pdf.cell(0, 10, f"Rate: 1 {data['from']} = {data['rate']:,.4f} {data['to']}", ln=1)
-    pdf.ln(10)
-    pdf.set_font("Helvetica", 'I', 11)
-    pdf.cell(0, 10, 'Thank you!', ln=1, align='C')
+    pdf.cell(0, 7, 'INVOICE', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.line(5, pdf.get_y(), 75, pdf.get_y())
+    pdf.ln(3)
+
+    # --- CONTENT ---
+    pdf.set_font("Helvetica", '', 11)
+
+    def print_row(label, value, bold=False):
+        pdf.cell(30, 6, label, border=0)
+        if bold: pdf.set_font("Helvetica", 'B', 11)
+        pdf.cell(0, 6, str(value), border=0, align='R', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+        if bold: pdf.set_font("Helvetica", '', 11)
+
+    print_row("Receipt No:", "690D" + now.strftime("%S"))
+    print_row("Date:", now.strftime('%d/%m/%Y'))
+    
+    cust = data.get('customer') if data.get('customer') else "អ្នកប្រើ ប្រា ស់"
+    print_row("Customer:", cust)
+    
+    if data.get('phone'): print_row("Phone:", data['phone'])
+    if data.get('address'): print_row("Addr:", data['address'])
+    
+    pdf.ln(3)
+    
+    sym_from = data['from']
+    sym_to = data['to']
+    
+    print_row("Exchange:", f"{data['from']} -> {data['to']}")
+    print_row("Amount In:", f"{data['amount']:,.2f} {sym_from}")
+    print_row("Rate:", f"{data['rate']:,.4f}")
+    
+    pdf.ln(3)
+    pdf.line(5, pdf.get_y(), 75, pdf.get_y())
+    pdf.ln(3)
+    
+    # Total
+    pdf.set_font("Helvetica", 'B', 14)
+    pdf.cell(25, 8, "TOTAL:", border=0)
+    pdf.cell(0, 8, f"{data['total']:,.2f} {sym_to}", border=0, align='R', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    
+    pdf.set_font("Helvetica", '', 11)
+    print_row("Received:", f"{data['total']:,.2f} {sym_to}")
+
+    # --- FOOTER ---
+    pdf.ln(6)
+    pdf.set_font("Helvetica", 'I', 8)
+    
+    start_y = pdf.get_y()
+    pdf.multi_cell(0, 5, "Please check your money before leaving.\nWe are not responsible afterwards.\nThank you!", align='C')
+    end_y = pdf.get_y()
+    
+    pdf.rect(5, start_y, 70, end_y - start_y)
+
     pdf.output(path)
     return filename
 
@@ -171,10 +218,15 @@ def exchange():
         
         log_transaction(data)
         pdf_filename = generate_pdf_invoice(data)
-        return jsonify({'success': True, 'total': data['total'], 'pdf_url': f"/download/{pdf_filename}", 'op': data['op']})
+        
+        return jsonify({
+            'success': True, 
+            'total': data['total'], 
+            'pdf_url': f"/download/{pdf_filename}", 
+            'op': data['op']
+        })
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
 
-# --- NEW DELETE ROUTES ---
 @app.route('/delete_transaction/<int:tx_id>', methods=['DELETE'])
 def delete_transaction(tx_id):
     try:
@@ -191,11 +243,10 @@ def delete_multiple():
     try:
         ids = request.json.get('ids', [])
         if not ids: return jsonify({'success': False, 'error': 'No IDs provided'})
-        
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        # Use parameterized query for safety
-        c.execute(f"DELETE FROM transactions WHERE id IN ({','.join(['?']*len(ids))})", ids)
+        placeholders = ','.join(['?'] * len(ids))
+        c.execute(f"DELETE FROM transactions WHERE id IN ({placeholders})", ids)
         conn.commit()
         conn.close()
         return jsonify({'success': True})
@@ -220,13 +271,11 @@ def update_transaction():
         cust = d['customer']
         amount = float(d['amount'])
         rate = float(d['rate'])
-        
         f, t = d['from'], d['to']
         if (f == 'USD' and t in ['KHR', 'THB']) or (f == 'THB' and t == 'KHR'):
             total = amount * rate
         else:
             total = amount / rate
-        
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
         c.execute("UPDATE transactions SET customer_name=?, amount_in=?, rate=?, amount_out=? WHERE id=?", 
@@ -248,11 +297,14 @@ def history_route():
     rows = get_filtered_history(period, pair)
     history_data = []
     for r in rows:
+        phone = r[10] if len(r) > 10 else ""
+        addr = r[11] if len(r) > 11 else ""
         history_data.append({
             'id': r[0], 'date': r[1], 'time': r[2],
             'from': r[3], 'to': r[4],
             'in': r[5], 'out': r[6],
-            'rate': r[7], 'customer': r[9]
+            'rate': r[7], 'customer': r[9],
+            'phone': phone, 'address': addr
         })
     return jsonify(history_data)
 
@@ -270,40 +322,34 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 def save_to_telegram():
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: 
         return jsonify({'success': False, 'error': 'Telegram Token or Chat ID missing'})
-    
     try:
         d = request.json
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
         amount = float(d['amount'])
         total = float(d['total'])
         rate = float(d['rate'])
         sym_from = SYMBOLS.get(d['from'], '')
         sym_to = SYMBOLS.get(d['to'], '')
         op = d.get('op', '×') 
-
         cust_info = ""
-        if d.get('customer'): cust_info = f"\nUser: {d['customer']}"
-
+        if d.get('customer'): cust_info += f"\nUser: {d['customer']}"
+        if d.get('phone'): cust_info += f"\nPhone: {d['phone']}"
+        if d.get('address'): cust_info += f"\nAddr: {d['address']}"
         msg = f"""
-<b>Saved Record – DPK Exchange</b>
+<b>Saved Record – DPK EXCHANGE</b>
 {now}
 
 From: {amount:,.2f} {sym_from} ({d['from']})
 To: {total:,.2f} {sym_to} ({d['to']})
 Rate: 1 {d['from']} = {rate:,.4f} {d['to']}
 Calculation: {amount:,.2f} {op} {rate:,.4f} = {total:,.2f}{cust_info}
-
-Saved manually from web 🌟
         """.strip()
-        
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
         payload = {"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "HTML"}
-        
         resp = requests.post(url, json=payload, timeout=10)
         if not resp.json().get('ok'): return jsonify({'success': False, 'error': 'Telegram Error'})
         return jsonify({'success': True})
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

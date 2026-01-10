@@ -34,26 +34,42 @@
         .filter-chip { cursor: pointer; border: 1px solid var(--glass-border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; margin-right: 5px; background: rgba(255,255,255,0.05); color: #94a3b8; }
         .filter-chip.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-        .sparkline { stroke-width: 2; fill: none; stroke-linecap: round; }
-        .trend-up { color: #10b981; stroke: #10b981; }
-        .trend-down { color: #ef4444; stroke: #ef4444; }
-
+        /* --- THERMAL PRINTER CSS --- */
         @media print {
             body * { visibility: hidden; } 
             #printReceipt, #printReceipt * { visibility: visible; }
             #printReceipt { 
                 display: block !important; 
-                position: absolute; left: 0; top: 0; width: 75mm; margin: 0; padding: 5px 0;
-                font-family: 'Noto Sans Khmer', sans-serif; background: white; color: black; font-size: 13px; line-height: 1.4; font-weight: 600;
+                position: absolute; left: 0; top: 0; 
+                width: 75mm; 
+                margin: 0; padding: 5px 2px;
+                font-family: 'Noto Sans Khmer', sans-serif; 
+                background: white; color: black; 
+                line-height: 1.3;
+                font-size: 14px;
             }
-            .receipt-header { text-align: center; font-weight: 800; font-size: 20px; text-transform: uppercase; }
-            .receipt-sub { text-align: center; font-size: 16px; margin-bottom: 5px; font-weight: bold; }
-            .receipt-line { border-top: 1px dashed #000; margin: 8px 0; opacity: 0.5; }
-            .receipt-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-            .receipt-label { font-size: 12px; color: #333; }
-            .receipt-val { font-weight: 700; font-size: 14px; }
-            .receipt-total { font-size: 22px; font-weight: 900; }
-            .receipt-footer { text-align: center; margin-top: 15px; font-size: 12px; }
+            .r-header { text-align: center; margin-bottom: 12px; position: relative; }
+            .r-logo-left { position: absolute; left: 0; top: 0; font-size: 26px; }
+            .r-logo-right { position: absolute; right: 0; top: 0; font-size: 26px; }
+            
+            .r-title-kh { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+            .r-sub-kh { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+            .r-contact { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+            .r-big-num { font-size: 16px; font-weight: 900; }
+            
+            .r-invoice-title { font-size: 20px; font-weight: 800; text-align: center; margin: 15px 0 10px 0; letter-spacing: 1px; }
+            
+            .r-meta-row { display: flex; justify-content: flex-end; font-size: 11px; text-align: right; line-height: 1.3; margin-bottom: 10px; }
+            
+            .r-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
+            .r-label { width: 45%; text-align: left; font-weight: 600; }
+            .r-sep { width: 5%; text-align: center; }
+            .r-val { width: 50%; text-align: right; font-weight: 800; font-size: 15px; word-wrap: break-word; }
+            
+            .r-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-size: 18px; font-weight: 900; }
+            
+            .r-box { border: 2px solid #000; padding: 8px; text-align: center; font-size: 11px; margin-top: 20px; font-weight: 600; border-radius: 4px; }
+            
             @page { size: 80mm auto; margin: 0; }
         }
     </style>
@@ -68,7 +84,6 @@
                     <ul class="dropdown-menu dropdown-menu-end bg-dark">
                         <li><a class="dropdown-item text-white" href="#" onclick="setLang('en')">🇺🇸 English</a></li>
                         <li><a class="dropdown-item text-white" href="#" onclick="setLang('km')">🇰🇭 ភាសាខ្មែរ</a></li>
-                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('zh')">🇨🇳 中文</a></li>
                     </ul>
                 </div>
                 <button class="btn btn-dark rounded-circle" onclick="openHistory()" title="History"><i class="fas fa-history"></i></button>
@@ -82,12 +97,57 @@
             <div class="col-lg-6">
                 <div class="glass-card h-100">
                     <h4 class="mb-4 fw-bold" data-i18n="new_tx">New Transaction</h4>
-                    <div class="input-group mb-3"><span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white"><i class="fas fa-user"></i></span><input type="text" id="customerName" class="form-control bg-transparent text-white border-secondary border-opacity-25" placeholder="Customer Name (Optional)"></div>
-                    <div class="currency-input-group"><img id="fromFlag" src="https://flagcdn.com/us.svg" width="28"><div class="currency-select"><select id="fromCurrency" onchange="updateUI()"><option value="USD" data-flag="us">USD</option><option value="KHR" data-flag="kh">KHR</option><option value="THB" data-flag="th">THB</option></select></div><input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00"></div>
-                    <div class="text-center my-2"><i class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon" onclick="swap()" style="cursor:pointer"></i></div>
-                    <div class="currency-input-group"><img id="toFlag" src="https://flagcdn.com/kh.svg" width="28"><div class="currency-select"><select id="toCurrency" onchange="updateUI()"><option value="KHR" data-flag="kh">KHR</option><option value="USD" data-flag="us">USD</option><option value="THB" data-flag="th">THB</option></select></div><input type="text" id="toAmount" class="amount-field" readonly></div>
-                    <div class="d-flex justify-content-between mt-3 text-muted small"><span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span></div>
-                    <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg"><span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i></button>
+                    
+                    <div class="input-group mb-2">
+                        <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white"><i class="fas fa-user"></i></span>
+                        <input type="text" id="customerName" class="form-control bg-transparent text-white border-secondary border-opacity-25" placeholder="Customer Name">
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <input type="text" id="customerPhone" class="form-control form-control-sm bg-transparent text-white border-secondary border-opacity-25" placeholder="Phone (Optional)">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" id="customerAddr" class="form-control form-control-sm bg-transparent text-white border-secondary border-opacity-25" placeholder="Address (Optional)">
+                        </div>
+                    </div>
+                    
+                    <div class="currency-input-group">
+                        <img id="fromFlag" src="https://flagcdn.com/us.svg" width="28">
+                        <div class="currency-select">
+                            <select id="fromCurrency" onchange="updateUI()">
+                                <option value="USD" data-flag="us">USD</option>
+                                <option value="KHR" data-flag="kh">KHR</option>
+                                <option value="THB" data-flag="th">THB</option>
+                            </select>
+                        </div>
+                        <input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00">
+                    </div>
+                    
+                    <div class="text-center my-2">
+                        <i class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon" onclick="swap()" style="cursor:pointer"></i>
+                    </div>
+                    
+                    <div class="currency-input-group">
+                        <img id="toFlag" src="https://flagcdn.com/kh.svg" width="28">
+                        <div class="currency-select">
+                            <select id="toCurrency" onchange="updateUI()">
+                                <option value="KHR" data-flag="kh">KHR</option>
+                                <option value="USD" data-flag="us">USD</option>
+                                <option value="THB" data-flag="th">THB</option>
+                            </select>
+                        </div>
+                        <input type="text" id="toAmount" class="amount-field" readonly>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3 text-muted small">
+                        <span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span>
+                    </div>
+                    
+                    <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg">
+                        <span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i>
+                    </button>
+                    
                     <div id="actionButtons" class="row mt-3 g-2" style="display:none">
                         <div class="col-4"><a id="pdfLink" class="btn btn-outline-light w-100 btn-sm"><i class="fas fa-file-pdf"></i> PDF</a></div>
                         <div class="col-4"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
@@ -97,10 +157,6 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="glass-card text-center mb-3 py-3">
-                    <h6 class="text-muted text-uppercase small mb-1" data-i18n="people_count">People Exchanged Today</h6>
-                    <h1 class="display-5 fw-bold text-success mb-0" id="peopleCount">...</h1>
-                </div>
                 <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <ul class="nav nav-pills custom-pills" role="tablist">
@@ -109,6 +165,7 @@
                         </ul>
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleEditRates()" id="editRatesBtn"><i class="fas fa-pen me-1"></i> Edit</button>
                     </div>
+                    
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="content-rates">
                             <div class="table-responsive">
@@ -125,6 +182,7 @@
                                 </table>
                             </div>
                         </div>
+                        
                         <div class="tab-pane fade" id="content-convert">
                             <div class="p-2">
                                 <ul class="nav nav-pills qc-pills mb-3" id="qcTabs" role="tablist">
@@ -155,24 +213,17 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content glass-card p-0 overflow-hidden border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold" data-i18n="history_title">History & Filters</h5>
+                    <h5 class="fw-bold" data-i18n="history_title">History</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
-                        <div class="d-flex gap-2 align-items-center">
-                            <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Search..." onkeyup="searchHistory()" style="width: 200px;">
-                            <div class="vr bg-secondary"></div>
-                            <select id="timeFilter" class="form-select form-select-sm bg-dark text-white w-auto" onchange="loadHistory()"><option value="all">All</option><option value="week">Week</option><option value="month">Month</option></select>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-danger" onclick="deleteSelected()">Delete Selected</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAll()">Delete All</button>
-                        </div>
+                    <div class="d-flex justify-content-between mb-3">
+                         <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary w-auto" placeholder="Search..." onkeyup="searchHistory()">
+                         <button class="btn btn-sm btn-outline-danger" onclick="deleteAll()">Delete All</button>
                     </div>
                     <div class="table-responsive" style="max-height: 50vh;">
                         <table class="table table-dark table-sm align-middle mb-0">
-                            <thead><tr class="text-secondary"><th width="30"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th><th data-i18n="col_time">Time</th><th data-i18n="col_cust">Customer</th><th>In</th><th>Out</th><th data-i18n="rate">Rate</th><th data-i18n="col_action">Action</th></tr></thead>
+                            <thead><tr class="text-secondary"><th data-i18n="col_time">Time</th><th data-i18n="col_cust">Customer</th><th>In</th><th>Out</th><th>Rate</th><th>Action</th></tr></thead>
                             <tbody id="historyList"></tbody>
                         </table>
                     </div>
@@ -181,72 +232,229 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-card border-0">
-                <h5 class="fw-bold mb-3">Edit Transaction</h5><input type="hidden" id="editId"><input type="hidden" id="editFrom"><input type="hidden" id="editTo">
-                <div class="mb-2"><label class="small text-muted">Customer</label><input type="text" id="editCust" class="form-control bg-dark text-white border-secondary"></div>
-                <div class="row g-2 mb-3"><div class="col-6"><label class="small text-muted">Amount</label><input type="number" id="editAmount" class="form-control bg-dark text-white border-secondary"></div><div class="col-6"><label class="small text-muted">Rate</label><input type="number" id="editRate" class="form-control bg-dark text-white border-secondary"></div></div>
-                <button onclick="saveEdit()" class="btn btn-success w-100">Save Changes</button>
+    <div id="printReceipt" style="display:none">
+        <div class="r-header">
+            <!-- <div class="r-logo-left"><i class="fas fa-crown"></i></div>
+            <div class="r-logo-right"><i class="fas fa-crown"></i></div> -->
+            
+            <div class="r-title-kh">DPK EXCHANGE</div>
+            <div class="r-sub-kh">ប្តូរប្រាក់ និង វេរប្រាក់</div>
+            <div class="r-sub-kh">ផ្លូវមិត្តភាព បុរី Good Luck </div>
+            <div class="r-contact">Tel: 012 53 53 24, 012 80 94 25</div>
+            <!-- <div class="r-big-num">78 78</div> -->
+        </div>
+        
+        <div class="r-invoice-title">វិក្កយបត្រ</div>
+        
+        <div class="r-meta-row">
+            <div>
+                លេខវិក្កយបត្រ: <span id="rId"></span><br>
+                កាលបរិច្ឆេទ: <span id="rDate"></span><br>
+                <span id="rTime"></span>
             </div>
         </div>
-    </div>
+        
+        <div class="r-row">
+            <div class="r-label">អតិថិជន</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rCust"></div> 
+        </div>
 
-    <div id="printReceipt" style="display:none">
-        <div class="receipt-header">DPK EXCHANGE</div>
-        <div class="receipt-sub">ប្តូរប្រាក់</div>
-        <div class="receipt-line">-</div>
-        <div style="text-align:center; font-size: 11px;" id="rDate"></div>
-        <div class="receipt-line">-</div>
-        <div class="receipt-row"><span class="receipt-label">Received (ទទួល):</span><span id="rIn" class="receipt-val"></span></div>
-        <div class="receipt-row"><span class="receipt-label">Rate (អត្រា):</span><span id="rRate" class="receipt-val"></span></div>
-        <div class="receipt-line">-</div>
-        <div class="receipt-row" style="margin-top:5px; align-items:flex-end;"><span style="font-size:14px; font-weight:bold;">TOTAL (សរុប):</span><span id="rOut" class="receipt-total"></span></div>
-        <div class="receipt-line">-</div>
-        <div class="receipt-footer">សូមពិនិត្យឱ្យបានត្រឹមត្រូវមុនចាកចេញ<br><span style="font-size:10px; opacity:0.7;">Thank You!</span></div>
+        <div class="r-row">
+            <div class="r-label">អាស័យដ្ឌាន</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rAddr"></div> 
+        </div>
+
+        <div class="r-row">
+            <div class="r-label">ទូរស័ព្ទ</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rPhone"></div> 
+        </div>
+
+        <div class="r-row" style="margin-top: 5px;">
+            <div class="r-label">ចំនួនទឹកប្រាក់ប្តូរ</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rIn"></div> 
+        </div>
+        
+        <div class="r-row">
+            <div class="r-label">អត្រាប្តូរប្រាក់</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rRate"></div> 
+        </div>
+
+        <div class="r-row">
+            <div class="r-label">ចំនួនទឹកប្រាក់សរុប</div>
+            <div class="r-sep">:</div>
+            <div class="r-val" id="rOut"></div>
+        </div>
+        
+        <div class="r-total-row">
+            <div>ចំនួនទឹកប្រាក់ទទួល</div>
+            <div id="rRec"></div>
+        </div>
+        
+        <div class="r-box">
+            សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>
+            សូមអរគុណ!<br>
+            Tel: 012 53 53 24
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "People Exchanged Today", unique_tx: "Transactions", history_title: "History & Filters", filter_all: "All Time", filter_week: "This Week", filter_month: "This Month", col_time: "Time", col_cust: "Customer", col_action: "Action", placeholder_cust: "Customer Name (Optional)" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "ចំនួនអ្នកប្តូរប្រាក់ថ្ងៃនេះ", unique_tx: "ប្រតិបត្តិការ", history_title: "ប្រវត្តិ & ស្វែងរក", filter_all: "គ្រប់ពេល", filter_week: "សប្តាហ៍នេះ", filter_month: "ខែនេះ", col_time: "ម៉ោង", col_cust: "អតិថិជន", col_action: "សកម្មភាព", placeholder_cust: "ឈ្មោះអតិថិជន (មិនបង្ខំ)" }, zh: { new_tx: "新交易", rate: "汇率", btn_process: "处理", btn_print: "打印", btn_save: "保存", people_count: "今日兑换人数", unique_tx: "交易笔数", history_title: "历史记录 & 筛选", filter_all: "全部时间", filter_week: "本周", filter_month: "本月", col_time: "时间", col_cust: "客户", col_action: "操作", placeholder_cust: "客户姓名 (可选)" } };
-        function setLang(lang) { localStorage.setItem('lang', lang); document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if(i18n[lang][k]) el.innerText = i18n[lang][k]; }); document.getElementById('customerName').placeholder = i18n[lang]['placeholder_cust']; }
-        function toggleEditRates() { const inputs = document.querySelectorAll('.rate-input'); const btn = document.getElementById('editRatesBtn'); const isEditing = !inputs[0].readOnly; inputs.forEach(input => { input.readOnly = isEditing; if(!isEditing) input.classList.add('editable'); else input.classList.remove('editable'); }); if(!isEditing) { btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-success'); btn.innerHTML = '<i class="fas fa-check me-1"></i> Done'; } else { btn.classList.add('btn-outline-secondary'); btn.classList.remove('btn-success'); btn.innerHTML = '<i class="fas fa-pen me-1"></i> Edit'; } }
-        function updateQuickTable() { const pairs = [{ id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '៛' }, { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '฿' }, { id: 'khr-usd', rateId: 'khr_usd', steps: [4000, 10000, 20000, 50000, 100000, 500000], op: '/', s: '៛', t: '$' }, { id: 'khr-thb', rateId: 'khr_thb', steps: [1000, 5000, 10000, 20000, 50000, 100000], op: '/', s: '៛', t: '฿' }, { id: 'thb-usd', rateId: 'thb_usd', steps: [100, 500, 1000, 2000, 5000, 10000], op: '/', s: '฿', t: '$' }, { id: 'thb-khr', rateId: 'thb_khr', steps: [20, 50, 100, 500, 1000, 5000], op: '*', s: '฿', t: '៛' }]; pairs.forEach(p => { const r = parseFloat(document.getElementById(p.rateId).value) || 1; let html = `<tr class="table-active"><th>${p.s}</th><th>${p.t}</th></tr>`; p.steps.forEach(amt => { let res = (p.op === '*') ? amt * r : amt / r; let resStr = (res < 10) ? res.toFixed(2) : Math.round(res).toLocaleString(); html += `<tr><td>${amt.toLocaleString()}</td><td class="text-success fw-bold">${resStr}</td></tr>`; }); document.getElementById(`table-${p.id}`).innerHTML = html; }); }
-
-        let currentPairFilter = 'all'; let latestTx = null; const SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'};
-        function updateUI() { const f = document.getElementById('fromCurrency').value; const t = document.getElementById('toCurrency').value; const amt = parseFloat(document.getElementById('fromAmount').value) || 0; const fImg = document.getElementById('fromCurrency').selectedOptions[0].dataset.flag; const tImg = document.getElementById('toCurrency').selectedOptions[0].dataset.flag; document.getElementById('fromFlag').src = `https://flagcdn.com/${fImg}.svg`; document.getElementById('toFlag').src = `https://flagcdn.com/${tImg}.svg`; let rate = 1; let total = 0; if(f === t) total = amt; else { const directEl = document.getElementById(`${f.toLowerCase()}_${t.toLowerCase()}`); if(directEl) { rate = parseFloat(directEl.value); if((f=='USD'&&t=='KHR') || (f=='USD'&&t=='THB') || (f=='THB'&&t=='KHR')) total = amt * rate; else total = amt / rate; } } document.getElementById('toAmount').value = total.toLocaleString('en-US', {minimumFractionDigits: 2}); document.getElementById('displayRate').innerText = `1 ${f} = ${rate} ${t}`; }
-        function swap() { const f = document.getElementById('fromCurrency'), t = document.getElementById('toCurrency'); [f.value, t.value] = [t.value, f.value]; const icon = document.querySelector('.swap-icon'); icon.classList.add('rotate'); setTimeout(() => icon.classList.remove('rotate'), 500); updateUI(); }
-        async function processExchange() { const data = { from: document.getElementById('fromCurrency').value, to: document.getElementById('toCurrency').value, amount: document.getElementById('fromAmount').value, rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1], customer: document.getElementById('customerName').value }; const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); const json = await res.json(); if(json.success) { document.getElementById('actionButtons').style.display = 'flex'; document.getElementById('pdfLink').href = json.pdf_url; latestTx = {...data, total: json.total, op: json.op}; updateStats(); } }
-        async function updateStats() { const res = await fetch('/stats'); const d = await res.json(); document.getElementById('peopleCount').innerText = d.count; }
-        function setPairFilter(pair, el) { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); currentPairFilter = pair; loadHistory(); }
-        async function loadHistory() { const period = document.getElementById('timeFilter').value; const res = await fetch(`/history?period=${period}&pair=${currentPairFilter}`); const list = await res.json(); const tbody = document.getElementById('historyList'); tbody.innerHTML = ''; list.forEach(item => { const safeJson = JSON.stringify(item).replace(/"/g, '&quot;'); tbody.innerHTML += `<tr><td><input type="checkbox" class="tx-checkbox" value="${item.id}"></td><td><div class="small text-white">${item.date}</div><div class="text-muted" style="font-size:10px">${item.time}</div></td><td><div class="fw-bold">${item.customer || '-'}</div></td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td class="small text-muted">${item.rate}</td><td><button class="btn btn-sm btn-outline-secondary border-0 text-warning" onclick="openEdit(${safeJson})"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-outline-secondary border-0 text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; }); searchHistory(); }
-        function searchHistory() { const term = document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('#historyList tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; }); }
-        function toggleSelectAll() { const master = document.getElementById('selectAll'); document.querySelectorAll('.tx-checkbox').forEach(cb => { if(cb.closest('tr').style.display !== 'none') cb.checked = master.checked; }); }
-        async function deleteSelected() { const selected = Array.from(document.querySelectorAll('.tx-checkbox:checked')).map(cb => cb.value); if(selected.length === 0) return alert('Select items first'); if(!confirm(`Delete ${selected.length} items?`)) return; await fetch('/delete_multiple', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ids: selected}) }); loadHistory(); updateStats(); }
-        async function deleteAll() { if(!confirm('DANGER: Delete ALL history permanently?')) return; await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); }
-        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
-        async function deleteTx(id) { if(!confirm('Delete transaction?')) return; await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); }
-        function openEdit(item) { document.getElementById('editId').value = item.id; document.getElementById('editFrom').value = item.from; document.getElementById('editTo').value = item.to; document.getElementById('editCust').value = item.customer; document.getElementById('editAmount').value = item.in; document.getElementById('editRate').value = item.rate; new bootstrap.Modal(document.getElementById('editModal')).show(); }
-        async function saveEdit() { const data = { id: document.getElementById('editId').value, from: document.getElementById('editFrom').value, to: document.getElementById('editTo').value, customer: document.getElementById('editCust').value, amount: document.getElementById('editAmount').value, rate: document.getElementById('editRate').value }; await fetch('/update_transaction', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); bootstrap.Modal.getInstance(document.getElementById('editModal')).hide(); loadHistory(); updateStats(); }
+        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", history_title: "History", col_time: "Time", col_cust: "Customer", placeholder_cust: "Customer Name" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", history_title: "ប្រវត្តិ", col_time: "ម៉ោង", col_cust: "អតិថិជន", placeholder_cust: "ឈ្មោះអតិថិជន" } };
         
+        function setLang(lang) { 
+            localStorage.setItem('lang', lang); 
+            document.querySelectorAll('[data-i18n]').forEach(el => { 
+                const k = el.getAttribute('data-i18n'); 
+                if(i18n[lang][k]) el.innerText = i18n[lang][k]; 
+            }); 
+            document.getElementById('customerName').placeholder = i18n[lang]['placeholder_cust']; 
+        }
+
+        function toggleEditRates() { 
+            const inputs = document.querySelectorAll('.rate-input'); 
+            const btn = document.getElementById('editRatesBtn'); 
+            const isEditing = !inputs[0].readOnly; 
+            inputs.forEach(input => { 
+                input.readOnly = isEditing; 
+                if(!isEditing) input.classList.add('editable'); else input.classList.remove('editable'); 
+            }); 
+            if(!isEditing) { btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-success'); btn.innerHTML = '<i class="fas fa-check me-1"></i> Done'; } 
+            else { btn.classList.add('btn-outline-secondary'); btn.classList.remove('btn-success'); btn.innerHTML = '<i class="fas fa-pen me-1"></i> Edit'; } 
+        }
+
+        function updateQuickTable() {
+            const pairs = [
+                { id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '៛' },
+                { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '฿' },
+                { id: 'khr-usd', rateId: 'khr_usd', steps: [4000, 10000, 20000, 50000, 100000, 500000], op: '/', s: '៛', t: '$' },
+                { id: 'khr-thb', rateId: 'khr_thb', steps: [1000, 5000, 10000, 20000, 50000, 100000], op: '/', s: '៛', t: '฿' },
+                { id: 'thb-usd', rateId: 'thb_usd', steps: [100, 500, 1000, 2000, 5000, 10000], op: '/', s: '฿', t: '$' },
+                { id: 'thb-khr', rateId: 'thb_khr', steps: [20, 50, 100, 500, 1000, 5000], op: '*', s: '฿', t: '៛' }
+            ];
+
+            pairs.forEach(p => {
+                const r = parseFloat(document.getElementById(p.rateId).value) || 1;
+                let html = `<tr class="table-active"><th>${p.s}</th><th>${p.t}</th></tr>`;
+                p.steps.forEach(amt => {
+                    let res = (p.op === '*') ? amt * r : amt / r;
+                    let resStr = (res < 10) ? res.toFixed(2) : Math.round(res).toLocaleString();
+                    html += `<tr><td>${amt.toLocaleString()}</td><td class="text-success fw-bold">${resStr}</td></tr>`;
+                });
+                const tableBody = document.getElementById(`table-${p.id}`);
+                if(tableBody) tableBody.innerHTML = html;
+            });
+        }
+
+        let latestTx = null; 
+        const SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'};
+
+        function updateUI() { 
+            const f = document.getElementById('fromCurrency').value; 
+            const t = document.getElementById('toCurrency').value; 
+            const amt = parseFloat(document.getElementById('fromAmount').value) || 0; 
+            const fImg = document.getElementById('fromCurrency').selectedOptions[0].dataset.flag; 
+            const tImg = document.getElementById('toCurrency').selectedOptions[0].dataset.flag; 
+            
+            document.getElementById('fromFlag').src = `https://flagcdn.com/${fImg}.svg`; 
+            document.getElementById('toFlag').src = `https://flagcdn.com/${tImg}.svg`; 
+            
+            let rate = 1; let total = 0; 
+            if(f === t) total = amt; 
+            else { 
+                const directEl = document.getElementById(`${f.toLowerCase()}_${t.toLowerCase()}`); 
+                if(directEl) { 
+                    rate = parseFloat(directEl.value); 
+                    if((f=='USD'&&t=='KHR') || (f=='USD'&&t=='THB') || (f=='THB'&&t=='KHR')) total = amt * rate; 
+                    else total = amt / rate; 
+                } 
+            } 
+            document.getElementById('toAmount').value = total.toLocaleString('en-US', {minimumFractionDigits: 2}); 
+            document.getElementById('displayRate').innerText = `1 ${f} = ${rate} ${t}`; 
+        }
+
+        function swap() { 
+            const f = document.getElementById('fromCurrency'), t = document.getElementById('toCurrency'); 
+            [f.value, t.value] = [t.value, f.value]; 
+            updateUI(); 
+        }
+
+        async function processExchange() { 
+            const data = { 
+                from: document.getElementById('fromCurrency').value, 
+                to: document.getElementById('toCurrency').value, 
+                amount: document.getElementById('fromAmount').value, 
+                rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1], 
+                customer: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddr').value
+            }; 
+            
+            const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); 
+            const json = await res.json(); 
+            
+            if(json.success) { 
+                document.getElementById('actionButtons').style.display = 'flex'; 
+                document.getElementById('pdfLink').href = json.pdf_url; 
+                latestTx = {...data, total: json.total, op: json.op}; 
+            } 
+        }
+
         function printReceipt() { 
             if(!latestTx) return; 
-            const symOut = SYMBOLS[latestTx.to] || latestTx.to;
-            document.getElementById('rDate').innerText = new Date().toLocaleString(); 
-            document.getElementById('rIn').innerText = `${parseFloat(latestTx.amount).toLocaleString()} ${latestTx.from}`; 
-            document.getElementById('rRate').innerText = latestTx.rate; 
-            document.getElementById('rOut').innerText = `${parseFloat(latestTx.total).toLocaleString()} ${symOut}`; 
             
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB'); 
+            const timeStr = now.toLocaleTimeString('en-GB'); 
+            const randId = "690D" + Math.floor(Math.random() * 10000);
+
+            document.getElementById('rId').innerText = randId;
+            document.getElementById('rDate').innerText = dateStr;
+            document.getElementById('rTime').innerText = timeStr;
+            
+            // Set default customer name to "អ្នកប្រើ ប្រា ស់" if empty
+            const custName = latestTx.customer ? latestTx.customer : "អ្នកប្រើ ប្រា ស់";
+            document.getElementById('rCust').innerText = custName;
+            document.getElementById('rAddr').innerText = latestTx.address || "........................."; 
+            document.getElementById('rPhone').innerText = latestTx.phone || ".........................";
+
+            const symFrom = SYMBOLS[latestTx.from] || latestTx.from;
+            const symOut = SYMBOLS[latestTx.to] || latestTx.to;
+            
+            document.getElementById('rIn').innerText = `${parseFloat(latestTx.amount).toLocaleString()} ${symFrom}`;
+            document.getElementById('rRate').innerText = latestTx.rate;
+            
+            const totalOut = `${parseFloat(latestTx.total).toLocaleString()} ${symOut}`;
+            document.getElementById('rOut').innerText = totalOut;
+            document.getElementById('rRec').innerText = totalOut; // Amount Received matches Total
+
             const r = document.getElementById('printReceipt'); 
             r.style.display = 'block'; 
             window.print(); 
             r.style.display = 'none'; 
         }
         
+        async function loadHistory() { 
+            const res = await fetch(`/history?period=all&pair=all`); 
+            const list = await res.json(); 
+            const tbody = document.getElementById('historyList'); 
+            tbody.innerHTML = ''; 
+            list.forEach(item => { 
+                tbody.innerHTML += `<tr><td><div class="small text-white">${item.date}</div></td><td>${item.customer || '-'}</td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td>${item.rate}</td><td><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
+            }); 
+        }
+        
+        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); }
+        async function deleteAll() { if(confirm('Delete All?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); } }
+        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
         async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); alert('Sent to Telegram!'); }
 
         document.getElementById('fromAmount').addEventListener('input', updateUI);
-        updateUI(); updateStats(); setLang(localStorage.getItem('lang') || 'en'); updateQuickTable();
+        updateUI(); setLang('en'); updateQuickTable();
         document.getElementById('darkToggle').addEventListener('click', () => { const h = document.documentElement; h.setAttribute('data-bs-theme', h.getAttribute('data-bs-theme')==='dark'?'light':'dark'); });
     </script>
 </body>
