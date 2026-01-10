@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DPK Exchange</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DPK Exchange</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+        <style>
         :root { --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --accent-color: #818cf8; --text-main: #ffffff; }
         [data-bs-theme="light"] { --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(0, 0, 0, 0.08); --text-main: #1e293b; }
         
@@ -73,133 +78,282 @@
             @page { size: 80mm auto; margin: 0; }
         }
     </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand p-3">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-4" href="#"><i class="fas fa-wallet me-2 text-primary"></i>DPK Exchange</a>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="dropdown">
-                    <button class="btn btn-dark rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-globe"></i></button>
-                    <ul class="dropdown-menu dropdown-menu-end bg-dark">
-                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('en')">🇺🇸 English</a></li>
-                        <li><a class="dropdown-item text-white" href="#" onclick="setLang('km')">🇰🇭 ភាសាខ្មែរ</a></li>
-                    </ul>
-                </div>
-                <button class="btn btn-dark rounded-circle" onclick="openHistory()" title="History"><i class="fas fa-history"></i></button>
-                <button class="btn btn-dark rounded-circle" id="darkToggle"><i class="fas fa-sun"></i></button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container py-3">
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="glass-card h-100">
-                    <h4 class="mb-4 fw-bold" data-i18n="new_tx">New Transaction</h4>
-                    
-                    <div class="input-group mb-2">
-                        <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white"><i class="fas fa-user"></i></span>
-                        <input type="text" id="customerName" class="form-control bg-transparent text-white border-secondary border-opacity-25" placeholder="Customer Name">
-                    </div>
-                    
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <input type="text" id="customerPhone" class="form-control form-control-sm bg-transparent text-white border-secondary border-opacity-25" placeholder="Phone (Optional)">
-                        </div>
-                        <div class="col-6">
-                            <input type="text" id="customerAddr" class="form-control form-control-sm bg-transparent text-white border-secondary border-opacity-25" placeholder="Address (Optional)">
-                        </div>
-                    </div>
-                    
-                    <div class="currency-input-group">
-                        <img id="fromFlag" src="https://flagcdn.com/us.svg" width="28">
-                        <div class="currency-select">
-                            <select id="fromCurrency" onchange="updateUI()">
-                                <option value="USD" data-flag="us">USD</option>
-                                <option value="KHR" data-flag="kh">KHR</option>
-                                <option value="THB" data-flag="th">THB</option>
-                            </select>
-                        </div>
-                        <input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00">
-                    </div>
-                    
-                    <div class="text-center my-2">
-                        <i class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon" onclick="swap()" style="cursor:pointer"></i>
-                    </div>
-                    
-                    <div class="currency-input-group">
-                        <img id="toFlag" src="https://flagcdn.com/kh.svg" width="28">
-                        <div class="currency-select">
-                            <select id="toCurrency" onchange="updateUI()">
-                                <option value="KHR" data-flag="kh">KHR</option>
-                                <option value="USD" data-flag="us">USD</option>
-                                <option value="THB" data-flag="th">THB</option>
-                            </select>
-                        </div>
-                        <input type="text" id="toAmount" class="amount-field" readonly>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mt-3 text-muted small">
-                        <span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span>
-                    </div>
-                    
-                    <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg">
-                        <span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i>
-                    </button>
-                    
-                    <div id="actionButtons" class="row mt-3 g-2" style="display:none">
-                        <div class="col-4"><a id="pdfLink" class="btn btn-outline-light w-100 btn-sm"><i class="fas fa-file-pdf"></i> PDF</a></div>
-                        <div class="col-4"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
-                        <div class="col-4"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 btn-sm"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="glass-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <ul class="nav nav-pills custom-pills" role="tablist">
-                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#content-rates"><i class="fas fa-chart-line me-2"></i>Live Rates</button></li>
-                            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#content-convert"><i class="fas fa-calculator me-2"></i>Quick Convert</button></li>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand p-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold fs-4" href="#"><i
+                        class="fas fa-wallet me-2 text-primary"></i>DPK
+                    Exchange</a>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="dropdown">
+                        <button class="btn btn-dark rounded-circle"
+                            data-bs-toggle="dropdown"><i
+                                class="fas fa-globe"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark">
+                            <li><a class="dropdown-item text-white" href="#"
+                                    onclick="setLang('en')">🇺🇸
+                                    English</a></li>
+                            <li><a class="dropdown-item text-white" href="#"
+                                    onclick="setLang('km')">🇰🇭
+                                    ភាសាខ្មែរ</a></li>
                         </ul>
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleEditRates()" id="editRatesBtn"><i class="fas fa-pen me-1"></i> Edit</button>
                     </div>
-                    
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="content-rates">
-                            <div class="table-responsive">
-                                <table class="table table-borderless rate-table align-middle m-0 text-white">
-                                    <thead class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th class="text-end">Rate</th></tr></thead>
-                                    <tbody>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/KHR</small></div></td><td class="text-end"><input id="usd_khr" type="number" class="rate-input" value="4008" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/THB</small></div></td><td class="text-end"><input id="usd_thb" type="number" class="rate-input" value="31.44" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/USD</small></div></td><td class="text-end"><input id="khr_usd" type="number" class="rate-input" value="4021" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/THB</small></div></td><td class="text-end"><input id="khr_thb" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/USD</small></div></td><td class="text-end"><input id="thb_usd" type="number" class="rate-input" value="31.82" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                        <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/KHR</small></div></td><td class="text-end"><input id="thb_khr" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                    </tbody>
-                                </table>
+                    <button class="btn btn-dark rounded-circle"
+                        onclick="openHistory()" title="History"><i
+                            class="fas fa-history"></i></button>
+                    <button class="btn btn-dark rounded-circle"
+                        id="darkToggle"><i class="fas fa-sun"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container py-3">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="glass-card h-100">
+                        <h4 class="mb-4 fw-bold" data-i18n="new_tx">New
+                            Transaction</h4>
+
+                        <div class="currency-input-group">
+                            <img id="fromFlag" src="https://flagcdn.com/us.svg"
+                                width="28">
+                            <div class="currency-select">
+                                <select id="fromCurrency" onchange="updateUI()">
+                                    <option value="USD"
+                                        data-flag="us">USD</option>
+                                    <option value="KHR"
+                                        data-flag="kh">KHR</option>
+                                    <option value="THB"
+                                        data-flag="th">THB</option>
+                                </select>
                             </div>
+                            <input type="number" id="fromAmount"
+                                class="amount-field" value="1"
+                                placeholder="0.00">
                         </div>
-                        
-                        <div class="tab-pane fade" id="content-convert">
-                            <div class="p-2">
-                                <ul class="nav nav-pills qc-pills mb-3" id="qcTabs" role="tablist">
-                                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qc-usd-khr">USD/KHR</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-usd-thb">USD/THB</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-usd">KHR/USD</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-thb">KHR/THB</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-usd">THB/USD</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-khr">THB/KHR</button></li>
-                                </ul>
-                                <div class="tab-content">
-                                    <div class="tab-pane fade show active" id="qc-usd-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-khr"></tbody></table></div>
-                                    <div class="tab-pane fade" id="qc-usd-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-thb"></tbody></table></div>
-                                    <div class="tab-pane fade" id="qc-khr-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-usd"></tbody></table></div>
-                                    <div class="tab-pane fade" id="qc-khr-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-thb"></tbody></table></div>
-                                    <div class="tab-pane fade" id="qc-thb-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-usd"></tbody></table></div>
-                                    <div class="tab-pane fade" id="qc-thb-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-khr"></tbody></table></div>
+
+                        <div class="text-center my-2">
+                            <i
+                                class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon"
+                                onclick="swap()" style="cursor:pointer"></i>
+                        </div>
+
+                        <div class="currency-input-group">
+                            <img id="toFlag" src="https://flagcdn.com/kh.svg"
+                                width="28">
+                            <div class="currency-select">
+                                <select id="toCurrency" onchange="updateUI()">
+                                    <option value="KHR"
+                                        data-flag="kh">KHR</option>
+                                    <option value="USD"
+                                        data-flag="us">USD</option>
+                                    <option value="THB"
+                                        data-flag="th">THB</option>
+                                </select>
+                            </div>
+                            <input type="text" id="toAmount"
+                                class="amount-field" readonly>
+                        </div>
+
+                        <div
+                            class="d-flex justify-content-between mt-3 text-muted small">
+                            <span data-i18n="rate">Rate</span>: <span
+                                id="displayRate"
+                                class="fw-bold text-white">-</span>
+                        </div>
+
+                        <button onclick="processExchange()"
+                            class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg">
+                            <span data-i18n="btn_process">PROCESS</span> <i
+                                class="fas fa-paper-plane ms-2"></i>
+                        </button>
+
+                        <div id="actionButtons" class="row mt-3 g-2"
+                            style="display:none">
+                            <div class="col-4"><a id="pdfLink"
+                                    class="btn btn-outline-light w-100 btn-sm"><i
+                                        class="fas fa-file-pdf"></i>
+                                    PDF</a></div>
+                            <div class="col-4"><button onclick="printReceipt()"
+                                    class="btn btn-outline-warning w-100 btn-sm"><i
+                                        class="fas fa-print"></i> <span
+                                        data-i18n="btn_print">Print</span></button></div>
+                            <div class="col-4"><button onclick="saveTelegram()"
+                                    class="btn btn-outline-info w-100 btn-sm"><i
+                                        class="fab fa-telegram"></i> <span
+                                        data-i18n="btn_save">Save</span></button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="glass-card text-center mb-3 py-3">
+                        <h6 class="text-muted text-uppercase small mb-1"
+                            data-i18n="people_count">People Exchanged Today</h6>
+                        <h1 class="display-5 fw-bold text-success mb-0"
+                            id="peopleCount">...</h1>
+                    </div>
+
+                    <div class="glass-card">
+                        <div
+                            class="d-flex justify-content-between align-items-center mb-3">
+                            <ul class="nav nav-pills custom-pills"
+                                role="tablist">
+                                <li class="nav-item"><button
+                                        class="nav-link active"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#content-rates"><i
+                                            class="fas fa-chart-line me-2"></i>Live
+                                        Rates</button></li>
+                                <li class="nav-item"><button class="nav-link"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#content-convert"><i
+                                            class="fas fa-calculator me-2"></i>Quick
+                                        Convert</button></li>
+                            </ul>
+                            <button
+                                class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                onclick="toggleEditRates()" id="editRatesBtn"><i
+                                    class="fas fa-pen me-1"></i> Edit</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active"
+                                id="content-rates">
+                                <div class="table-responsive">
+                                    <table
+                                        class="table table-borderless rate-table align-middle m-0 text-white">
+                                        <thead
+                                            class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th
+                                                    class="text-end">Rate</th></tr></thead>
+                                        <tbody>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/us.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">USD/KHR</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="usd_khr"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="4008" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/us.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">USD/THB</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="usd_thb"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="31.44" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/kh.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">KHR/USD</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="khr_usd"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="4021" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/kh.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">KHR/THB</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="khr_thb"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="127.6" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/th.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">THB/USD</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="thb_usd"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="31.82" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div
+                                                        class="d-flex align-items-center gap-2"><img
+                                                            src="https://flagcdn.com/th.svg"
+                                                            width="20"><small
+                                                            class="fw-bold">THB/KHR</small></div></td><td
+                                                    class="text-end"><input
+                                                        id="thb_khr"
+                                                        type="number"
+                                                        class="rate-input"
+                                                        value="127.6" readonly
+                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="content-convert">
+                                <div class="p-2">
+                                    <ul class="nav nav-pills qc-pills mb-3"
+                                        id="qcTabs" role="tablist">
+                                        <li class="nav-item"><button
+                                                class="nav-link active"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-usd-khr">USD/KHR</button></li>
+                                        <li class="nav-item"><button
+                                                class="nav-link"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-usd-thb">USD/THB</button></li>
+                                        <li class="nav-item"><button
+                                                class="nav-link"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-khr-usd">KHR/USD</button></li>
+                                        <li class="nav-item"><button
+                                                class="nav-link"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-khr-thb">KHR/THB</button></li>
+                                        <li class="nav-item"><button
+                                                class="nav-link"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-thb-usd">THB/USD</button></li>
+                                        <li class="nav-item"><button
+                                                class="nav-link"
+                                                data-bs-toggle="pill"
+                                                data-bs-target="#qc-thb-khr">THB/KHR</button></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade show active"
+                                            id="qc-usd-khr"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-usd-khr"></tbody></table></div>
+                                        <div class="tab-pane fade"
+                                            id="qc-usd-thb"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-usd-thb"></tbody></table></div>
+                                        <div class="tab-pane fade"
+                                            id="qc-khr-usd"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-khr-usd"></tbody></table></div>
+                                        <div class="tab-pane fade"
+                                            id="qc-khr-thb"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-khr-thb"></tbody></table></div>
+                                        <div class="tab-pane fade"
+                                            id="qc-thb-usd"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-thb-usd"></tbody></table></div>
+                                        <div class="tab-pane fade"
+                                            id="qc-thb-khr"><table
+                                                class="table table-dark table-bordered text-center m-0"><tbody
+                                                    id="table-thb-khr"></tbody></table></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -207,104 +361,93 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="historyModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content glass-card p-0 overflow-hidden border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold" data-i18n="history_title">History</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3">
-                         <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary w-auto" placeholder="Search..." onkeyup="searchHistory()">
-                         <button class="btn btn-sm btn-outline-danger" onclick="deleteAll()">Delete All</button>
+        <div class="modal fade" id="historyModal" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div
+                    class="modal-content glass-card p-0 overflow-hidden border-0">
+                    <div
+                        class="modal-header border-bottom border-secondary border-opacity-25">
+                        <h5 class="fw-bold"
+                            data-i18n="history_title">History</h5>
+                        <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="table-responsive" style="max-height: 50vh;">
-                        <table class="table table-dark table-sm align-middle mb-0">
-                            <thead><tr class="text-secondary"><th data-i18n="col_time">Time</th><th data-i18n="col_cust">Customer</th><th>In</th><th>Out</th><th>Rate</th><th>Action</th></tr></thead>
-                            <tbody id="historyList"></tbody>
-                        </table>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" id="searchInput"
+                                class="form-control form-control-sm bg-dark text-white border-secondary w-auto"
+                                placeholder="Search..."
+                                onkeyup="searchHistory()">
+                            <button class="btn btn-sm btn-outline-danger"
+                                onclick="deleteAll()">Delete All</button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 50vh;">
+                            <table
+                                class="table table-dark table-sm align-middle mb-0">
+                                <thead><tr class="text-secondary"><th
+                                            data-i18n="col_time">Time</th><th>In</th><th>Out</th><th>Rate</th><th>Action</th></tr></thead>
+                                <tbody id="historyList"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="printReceipt" style="display:none">
-        <div class="r-header">
-            <!-- <div class="r-logo-left"><i class="fas fa-crown"></i></div>
-            <div class="r-logo-right"><i class="fas fa-crown"></i></div> -->
-            
-            <div class="r-title-kh">DPK EXCHANGE</div>
-            <div class="r-sub-kh">ប្តូរប្រាក់ និង វេរប្រាក់</div>
-            <div class="r-sub-kh">ផ្លូវមិត្តភាព បុរី Good Luck </div>
-            <div class="r-contact">Tel: 012 53 53 24, 012 80 94 25</div>
-            <!-- <div class="r-big-num">78 78</div> -->
-        </div>
-        
-        <div class="r-invoice-title">វិក្កយបត្រ</div>
-        
-        <div class="r-meta-row">
-            <div>
-                លេខវិក្កយបត្រ: <span id="rId"></span><br>
-                កាលបរិច្ឆេទ: <span id="rDate"></span><br>
-                <span id="rTime"></span>
+        <div id="printReceipt" style="display:none">
+            <div class="r-header">
+                <div class="r-title-kh">DPK EXCHANGE</div>
+                <div class="r-big-num">ប្តូរប្រាក់</div>
+                <div class="r-big-num">ផ្លូវមិត្តភាព​ បុរី Good Luck</div>
+                <div class="r-contact">Tel: 085 63 68 98 , 085 20 30 00</div>
+            </div>
+
+            <div class="r-invoice-title">វិក្កយបត្រ</div>
+
+            <div class="r-meta-row">
+                <div>
+                    លេខវិក្កយបត្រ: <span id="rId"></span><br>
+                    កាលបរិច្ឆេទ: <span id="rDate"></span><br>
+                    <span id="rTime"></span>
+                </div>
+            </div>
+
+            <div class="r-row" style="margin-top: 5px;">
+                <div class="r-big-num">ចំនួនទឹកប្រាក់ប្តូរ</div>
+                <div class="r-sep">:</div>
+                <div class="r-val" id="rIn"></div>
+            </div>
+
+            <div class="r-row">
+                <div class="r-big-num">អត្រាប្តូរប្រាក់</div>
+                <div class="r-sep">:</div>
+                <div class="r-val" id="rRate"></div>
+            </div>
+
+            <div class="r-row">
+                <div class="r-big-num">ចំនួនទឹកប្រាក់សរុប</div>
+                <div class="r-sep">:</div>
+                <div class="r-val" id="rOut"></div>
+            </div>
+
+            <div class="r-total-row">
+                <div>ចំនួនទឹកប្រាក់ទទួល</div>
+                <div id="rRec"></div>
+            </div>
+
+            <div class="r-box">
+                សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>
+                សូមអរគុណ!<br>
+                Tel: 085 63 68 98 , 085 20 30 00
             </div>
         </div>
-        
-        <div class="r-row">
-            <div class="r-label">អតិថិជន</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rCust"></div> 
-        </div>
 
-        <div class="r-row">
-            <div class="r-label">អាស័យដ្ឌាន</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rAddr"></div> 
-        </div>
-
-        <div class="r-row">
-            <div class="r-label">ទូរស័ព្ទ</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rPhone"></div> 
-        </div>
-
-        <div class="r-row" style="margin-top: 5px;">
-            <div class="r-label">ចំនួនទឹកប្រាក់ប្តូរ</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rIn"></div> 
-        </div>
-        
-        <div class="r-row">
-            <div class="r-label">អត្រាប្តូរប្រាក់</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rRate"></div> 
-        </div>
-
-        <div class="r-row">
-            <div class="r-label">ចំនួនទឹកប្រាក់សរុប</div>
-            <div class="r-sep">:</div>
-            <div class="r-val" id="rOut"></div>
-        </div>
-        
-        <div class="r-total-row">
-            <div>ចំនួនទឹកប្រាក់ទទួល</div>
-            <div id="rRec"></div>
-        </div>
-        
-        <div class="r-box">
-            សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>
-            សូមអរគុណ!<br>
-            Tel: 012 53 53 24
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", history_title: "History", col_time: "Time", col_cust: "Customer", placeholder_cust: "Customer Name" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", history_title: "ប្រវត្តិ", col_time: "ម៉ោង", col_cust: "អតិថិជន", placeholder_cust: "ឈ្មោះអតិថិជន" } };
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+        // Removed customer related keys from i18n
+        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "People Exchanged Today", history_title: "History", col_time: "Time" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "ចំនួនអ្នកប្តូរប្រាក់ថ្ងៃនេះ", history_title: "ប្រវត្តិ", col_time: "ម៉ោង" } };
         
         function setLang(lang) { 
             localStorage.setItem('lang', lang); 
@@ -312,7 +455,7 @@
                 const k = el.getAttribute('data-i18n'); 
                 if(i18n[lang][k]) el.innerText = i18n[lang][k]; 
             }); 
-            document.getElementById('customerName').placeholder = i18n[lang]['placeholder_cust']; 
+            // Removed customer placeholder update
         }
 
         function toggleEditRates() { 
@@ -388,10 +531,8 @@
                 from: document.getElementById('fromCurrency').value, 
                 to: document.getElementById('toCurrency').value, 
                 amount: document.getElementById('fromAmount').value, 
-                rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1], 
-                customer: document.getElementById('customerName').value,
-                phone: document.getElementById('customerPhone').value,
-                address: document.getElementById('customerAddr').value
+                rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]
+                // Removed customer, phone, address from payload
             }; 
             
             const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); 
@@ -401,7 +542,14 @@
                 document.getElementById('actionButtons').style.display = 'flex'; 
                 document.getElementById('pdfLink').href = json.pdf_url; 
                 latestTx = {...data, total: json.total, op: json.op}; 
+                updateStats(); 
             } 
+        }
+
+        async function updateStats() { 
+            const res = await fetch('/stats'); 
+            const d = await res.json(); 
+            document.getElementById('peopleCount').innerText = d.count; 
         }
 
         function printReceipt() { 
@@ -416,11 +564,7 @@
             document.getElementById('rDate').innerText = dateStr;
             document.getElementById('rTime').innerText = timeStr;
             
-            // Set default customer name to "អ្នកប្រើ ប្រា ស់" if empty
-            const custName = latestTx.customer ? latestTx.customer : "អ្នកប្រើ ប្រា ស់";
-            document.getElementById('rCust').innerText = custName;
-            document.getElementById('rAddr').innerText = latestTx.address || "........................."; 
-            document.getElementById('rPhone').innerText = latestTx.phone || ".........................";
+            // Removed customer/address/phone filling logic
 
             const symFrom = SYMBOLS[latestTx.from] || latestTx.from;
             const symOut = SYMBOLS[latestTx.to] || latestTx.to;
@@ -430,7 +574,7 @@
             
             const totalOut = `${parseFloat(latestTx.total).toLocaleString()} ${symOut}`;
             document.getElementById('rOut').innerText = totalOut;
-            document.getElementById('rRec').innerText = totalOut; // Amount Received matches Total
+            document.getElementById('rRec').innerText = totalOut;
 
             const r = document.getElementById('printReceipt'); 
             r.style.display = 'block'; 
@@ -444,18 +588,19 @@
             const tbody = document.getElementById('historyList'); 
             tbody.innerHTML = ''; 
             list.forEach(item => { 
-                tbody.innerHTML += `<tr><td><div class="small text-white">${item.date}</div></td><td>${item.customer || '-'}</td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td>${item.rate}</td><td><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
+                // Removed customer name column
+                tbody.innerHTML += `<tr><td><div class="small text-white">${item.date}</div></td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td>${item.rate}</td><td><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
             }); 
         }
         
-        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); }
-        async function deleteAll() { if(confirm('Delete All?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); } }
+        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); }
+        async function deleteAll() { if(confirm('Delete All?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); } }
         function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
         async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); alert('Sent to Telegram!'); }
 
         document.getElementById('fromAmount').addEventListener('input', updateUI);
-        updateUI(); setLang('en'); updateQuickTable();
+        updateUI(); updateStats(); setLang('en'); updateQuickTable();
         document.getElementById('darkToggle').addEventListener('click', () => { const h = document.documentElement; h.setAttribute('data-bs-theme', h.getAttribute('data-bs-theme')==='dark'?'light':'dark'); });
     </script>
-</body>
+    </body>
 </html>

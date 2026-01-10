@@ -24,27 +24,18 @@ if not os.path.exists(INVOICE_FOLDER):
 
 SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'}
 
-# --- DATABASE SETUP & MIGRATION ---
+# --- DATABASE SETUP ---
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+    # Removed customer_name, phone, address from schema
     c.execute('''CREATE TABLE IF NOT EXISTS transactions 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                   date TEXT, timestamp TEXT, 
                   from_curr TEXT, to_curr TEXT, 
                   amount_in REAL, amount_out REAL, 
                   rate REAL, op TEXT,
-                  customer_name TEXT, 
-                  phone TEXT, 
-                  address TEXT,
                   market TEXT)''')
-    try:
-        c.execute("SELECT phone FROM transactions LIMIT 1")
-    except sqlite3.OperationalError:
-        try:
-            c.execute("ALTER TABLE transactions ADD COLUMN phone TEXT")
-            c.execute("ALTER TABLE transactions ADD COLUMN address TEXT")
-        except: pass
     conn.commit()
     conn.close()
 
@@ -55,17 +46,14 @@ def log_transaction(data):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     now = datetime.datetime.now()
+    # Removed customer columns from INSERT
     c.execute("""
         INSERT INTO transactions 
-        (date, timestamp, from_curr, to_curr, amount_in, amount_out, rate, op, customer_name, phone, address, market) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (date, timestamp, from_curr, to_curr, amount_in, amount_out, rate, op, market) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), 
           data['from'], data['to'], data['amount'], data['total'], 
-          data['rate'], data['op'], 
-          data.get('customer', ''), 
-          data.get('phone', ''), 
-          data.get('address', ''), 
-          ''))
+          data['rate'], data['op'], ''))
     conn.commit()
     conn.close()
 
@@ -106,11 +94,11 @@ def get_daily_stats():
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     c.execute("SELECT from_curr, amount_in, to_curr, amount_out FROM transactions WHERE date = ?", (today,))
     rows = c.fetchall()
-    c.execute("SELECT COUNT(*) FROM transactions WHERE date = ? AND (customer_name IS NULL OR customer_name = '')", (today,))
-    guest_count = c.fetchone()[0]
-    c.execute("SELECT COUNT(DISTINCT customer_name) FROM transactions WHERE date = ? AND customer_name != ''", (today,))
-    named_count = c.fetchone()[0]
-    total_people = guest_count + named_count
+    
+    # Simplified count (Total transactions only)
+    c.execute("SELECT COUNT(*) FROM transactions WHERE date = ?", (today,))
+    total_people = c.fetchone()[0]
+    
     conn.close()
     stats = {'USD': {'in': 0, 'out': 0}, 'KHR': {'in': 0, 'out': 0}, 'THB': {'in': 0, 'out': 0}}
     for r in rows:
@@ -134,8 +122,7 @@ def generate_pdf_invoice(data):
     
     pdf.set_font("Helvetica", '', 9)
     pdf.cell(0, 5, 'Money Exchange & Transfer', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    pdf.cell(0, 5, 'Tel: 012 53 53 24, 012 80 94 25', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    pdf.cell(0, 5, '78 78', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+    pdf.cell(0, 5, 'Tel: 085636898, 085203000', new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
     
     pdf.ln(3)
     pdf.set_font("Helvetica", 'B', 14)
@@ -155,12 +142,8 @@ def generate_pdf_invoice(data):
     print_row("Receipt No:", "690D" + now.strftime("%S"))
     print_row("Date:", now.strftime('%d/%m/%Y'))
     
-    cust = data.get('customer') if data.get('customer') else "អ្នកប្រើ ប្រា ស់"
-    print_row("Customer:", cust)
-    
-    if data.get('phone'): print_row("Phone:", data['phone'])
-    if data.get('address'): print_row("Addr:", data['address'])
-    
+    # REMOVED Customer, Phone, Addr print rows
+
     pdf.ln(3)
     
     sym_from = data['from']
@@ -268,7 +251,6 @@ def update_transaction():
     try:
         d = request.json
         tx_id = d['id']
-        cust = d['customer']
         amount = float(d['amount'])
         rate = float(d['rate'])
         f, t = d['from'], d['to']
@@ -276,10 +258,12 @@ def update_transaction():
             total = amount * rate
         else:
             total = amount / rate
+            
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        c.execute("UPDATE transactions SET customer_name=?, amount_in=?, rate=?, amount_out=? WHERE id=?", 
-                 (cust, amount, rate, round(total, 2), tx_id))
+        # Removed customer update from SQL
+        c.execute("UPDATE transactions SET amount_in=?, rate=?, amount_out=? WHERE id=?", 
+                 (amount, rate, round(total, 2), tx_id))
         conn.commit()
         conn.close()
         return jsonify({'success': True})
@@ -297,14 +281,13 @@ def history_route():
     rows = get_filtered_history(period, pair)
     history_data = []
     for r in rows:
-        phone = r[10] if len(r) > 10 else ""
-        addr = r[11] if len(r) > 11 else ""
+        # DB Structure: id(0), date(1), time(2), from(3), to(4), in(5), out(6), rate(7), op(8), market(9)
         history_data.append({
             'id': r[0], 'date': r[1], 'time': r[2],
             'from': r[3], 'to': r[4],
             'in': r[5], 'out': r[6],
-            'rate': r[7], 'customer': r[9],
-            'phone': phone, 'address': addr
+            'rate': r[7]
+            # Removed customer, phone, address keys
         })
     return jsonify(history_data)
 
@@ -331,10 +314,9 @@ def save_to_telegram():
         sym_from = SYMBOLS.get(d['from'], '')
         sym_to = SYMBOLS.get(d['to'], '')
         op = d.get('op', '×') 
-        cust_info = ""
-        if d.get('customer'): cust_info += f"\nUser: {d['customer']}"
-        if d.get('phone'): cust_info += f"\nPhone: {d['phone']}"
-        if d.get('address'): cust_info += f"\nAddr: {d['address']}"
+        
+        # Removed customer info block construction
+
         msg = f"""
 <b>Saved Record – DPK EXCHANGE</b>
 {now}
@@ -342,7 +324,7 @@ def save_to_telegram():
 From: {amount:,.2f} {sym_from} ({d['from']})
 To: {total:,.2f} {sym_to} ({d['to']})
 Rate: 1 {d['from']} = {rate:,.4f} {d['to']}
-Calculation: {amount:,.2f} {op} {rate:,.4f} = {total:,.2f}{cust_info}
+Calculation: {amount:,.2f} {op} {rate:,.4f} = {total:,.2f}
         """.strip()
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
         payload = {"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "HTML"}
