@@ -10,35 +10,41 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link
-            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
             rel="stylesheet">
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
         <style>
         :root { --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --accent-color: #818cf8; --text-main: #ffffff; }
-        [data-bs-theme="light"] { --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(0, 0, 0, 0.08); --text-main: #1e293b; }
         
-        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', 'Noto Sans SC', sans-serif; background: #0f172a; min-height: 100vh; color: var(--text-main); overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', sans-serif; background: #0f172a; min-height: 100vh; color: var(--text-main); overflow-x: hidden; }
         
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-        .currency-input-group { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 14px; padding: 0.8rem; display: flex; align-items: center; margin-bottom: 1rem; }
+        
+        .main-card { max-height: 85vh; overflow-y: auto; scrollbar-width: thin; }
+        .main-card::-webkit-scrollbar { width: 6px; }
+        .main-card::-webkit-scrollbar-track { background: transparent; }
+        .main-card::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+
+        .currency-input-group { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 14px; padding: 0.8rem; display: flex; align-items: center; margin-bottom: 0.8rem; }
         .amount-field { background: transparent; border: none; color: var(--text-main); font-size: 1.5rem; font-weight: 700; text-align: right; width: 100%; outline: none; }
         .currency-select select { background: transparent; border: none; color: var(--text-main); font-weight: 700; outline: none; margin-left: 8px; cursor: pointer; }
-        [data-bs-theme="light"] select option { background: white; color: black; }
         select option { background: #1e293b; color: white; }
         
         .rate-input { background: transparent; border: 1px solid transparent; color: var(--text-main); font-weight: 700; text-align: right; width: 80px; padding: 2px 5px; border-radius: 6px; }
         .rate-input:focus, .rate-input.editable { background: rgba(255,255,255,0.1); border-color: var(--accent-color); outline: none; }
         
-        .custom-pills .nav-link { color: var(--text-main); border-radius: 12px; padding: 8px 16px; font-weight: 600; font-size: 0.9rem; }
+        .custom-pills .nav-link { color: var(--text-main); border-radius: 12px; padding: 8px 16px; font-weight: 600; font-size: 0.9rem; margin-right: 5px; }
         .custom-pills .nav-link.active { background: var(--accent-color); color: white; }
         .qc-pills { display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
         .qc-pills .nav-link { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; margin-right: 5px; }
         .qc-pills .nav-link.active { background: var(--text-main); color: var(--accent-color); font-weight: 700; }
-        .filter-chip { cursor: pointer; border: 1px solid var(--glass-border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; margin-right: 5px; background: rgba(255,255,255,0.05); color: #94a3b8; }
-        .filter-chip.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
+        /* Print formatting */
+        .pdf-export-container { padding: 15px; background: #0f172a; color: white; border-radius: 10px; font-family: 'Noto Sans Khmer', sans-serif; }
+        
         /* --- THERMAL PRINTER CSS --- */
         @media print {
             body * { visibility: hidden; } 
@@ -56,25 +62,18 @@
             .r-header { text-align: center; margin-bottom: 12px; position: relative; }
             .r-logo-left { position: absolute; left: 0; top: 0; font-size: 26px; }
             .r-logo-right { position: absolute; right: 0; top: 0; font-size: 26px; }
-            
             .r-title-kh { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
             .r-sub-kh { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
             .r-contact { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
             .r-big-num { font-size: 16px; font-weight: 900; }
-            
             .r-invoice-title { font-size: 20px; font-weight: 800; text-align: center; margin: 15px 0 10px 0; letter-spacing: 1px; }
-            
             .r-meta-row { display: flex; justify-content: flex-end; font-size: 11px; text-align: right; line-height: 1.3; margin-bottom: 10px; }
-            
             .r-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
             .r-label { width: 45%; text-align: left; font-weight: 600; }
             .r-sep { width: 5%; text-align: center; }
             .r-val { width: 50%; text-align: right; font-weight: 800; font-size: 15px; word-wrap: break-word; }
-            
             .r-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-size: 18px; font-weight: 900; }
-            
             .r-box { border: 2px solid #000; padding: 8px; text-align: center; font-size: 11px; margin-top: 20px; font-weight: 600; border-radius: 4px; }
-            
             @page { size: 80mm auto; margin: 0; }
         }
     </style>
@@ -83,280 +82,155 @@
         <nav class="navbar navbar-expand p-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold fs-4" href="#"><i
-                        class="fas fa-wallet me-2 text-primary"></i>DPK
-                    Exchange</a>
+                        class="fas fa-wallet me-2 text-primary"></i>DPK Exchange</a>
                 <div class="d-flex gap-2 align-items-center">
                     <div class="dropdown">
-                        <button class="btn btn-dark rounded-circle"
-                            data-bs-toggle="dropdown"><i
-                                class="fas fa-globe"></i></button>
+                        <button class="btn btn-dark rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-globe"></i></button>
                         <ul class="dropdown-menu dropdown-menu-end bg-dark">
-                            <li><a class="dropdown-item text-white" href="#"
-                                    onclick="setLang('en')">🇺🇸
-                                    English</a></li>
-                            <li><a class="dropdown-item text-white" href="#"
-                                    onclick="setLang('km')">🇰🇭
-                                    ភាសាខ្មែរ</a></li>
+                            <li><a class="dropdown-item text-white" href="#" onclick="setLang('en')">🇺🇸 English</a></li>
+                            <li><a class="dropdown-item text-white" href="#" onclick="setLang('km')">🇰🇭 ភាសាខ្មែរ</a></li>
                         </ul>
                     </div>
-                    <button class="btn btn-dark rounded-circle"
-                        onclick="openHistory()" title="History"><i
-                            class="fas fa-history"></i></button>
-                    <button class="btn btn-dark rounded-circle"
-                        id="darkToggle"><i class="fas fa-sun"></i></button>
+                    <button class="btn btn-dark rounded-circle" onclick="openHistory()" title="History"><i class="fas fa-history"></i></button>
                 </div>
             </div>
         </nav>
 
-        <div class="container py-3">
+        <div class="container py-2">
             <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="glass-card h-100">
-                        <h4 class="mb-4 fw-bold" data-i18n="new_tx">New
-                            Transaction</h4>
+                <div class="col-lg-5">
+                    <div class="glass-card main-card">
+                        <h4 class="mb-3 fw-bold" data-i18n="new_tx">New Transaction</h4>
 
                         <div class="currency-input-group">
-                            <img id="fromFlag" src="https://flagcdn.com/us.svg"
-                                width="28">
+                            <img id="fromFlag" src="https://flagcdn.com/us.svg" width="28">
                             <div class="currency-select">
                                 <select id="fromCurrency" onchange="updateUI()">
-                                    <option value="USD"
-                                        data-flag="us">USD</option>
-                                    <option value="KHR"
-                                        data-flag="kh">KHR</option>
-                                    <option value="THB"
-                                        data-flag="th">THB</option>
+                                    <option value="USD" data-flag="us">USD</option>
+                                    <option value="KHR" data-flag="kh">KHR</option>
+                                    <option value="THB" data-flag="th">THB</option>
                                 </select>
                             </div>
-                            <input type="number" id="fromAmount"
-                                class="amount-field" value="1"
-                                placeholder="0.00">
+                            <input type="number" id="fromAmount" class="amount-field" value="1" placeholder="0.00">
                         </div>
 
-                        <div class="text-center my-2">
-                            <i
-                                class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon"
-                                onclick="swap()" style="cursor:pointer"></i>
+                        <div class="text-center my-1">
+                            <i class="fa fa-exchange p-2 rounded-circle bg-secondary bg-opacity-25 swap-icon" onclick="swap()" style="cursor:pointer"></i>
                         </div>
 
-                        <div class="currency-input-group">
-                            <img id="toFlag" src="https://flagcdn.com/kh.svg"
-                                width="28">
+                        <div class="currency-input-group mb-2">
+                            <img id="toFlag" src="https://flagcdn.com/kh.svg" width="28">
                             <div class="currency-select">
                                 <select id="toCurrency" onchange="updateUI()">
-                                    <option value="KHR"
-                                        data-flag="kh">KHR</option>
-                                    <option value="USD"
-                                        data-flag="us">USD</option>
-                                    <option value="THB"
-                                        data-flag="th">THB</option>
+                                    <option value="KHR" data-flag="kh">KHR</option>
+                                    <option value="USD" data-flag="us">USD</option>
+                                    <option value="THB" data-flag="th">THB</option>
                                 </select>
                             </div>
-                            <input type="text" id="toAmount"
-                                class="amount-field" readonly>
+                            <input type="text" id="toAmount" class="amount-field" readonly>
                         </div>
 
-                        <div
-                            class="d-flex justify-content-between mt-3 text-muted small">
-                            <span data-i18n="rate">Rate</span>: <span
-                                id="displayRate"
-                                class="fw-bold text-white">-</span>
+                        <div class="currency-input-group py-2">
+                            <span class="text-muted fw-bold ms-2" data-i18n="fee">Fee (៛)</span>
+                            <input type="number" id="feeAmount" class="amount-field text-warning" value="0" step="100">
                         </div>
 
-                        <button onclick="processExchange()"
-                            class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-4 shadow-lg">
-                            <span data-i18n="btn_process">PROCESS</span> <i
-                                class="fas fa-paper-plane ms-2"></i>
+                        <div class="d-flex justify-content-between mt-2 text-muted small">
+                            <span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span>
+                        </div>
+
+                        <button onclick="processExchange()" class="btn btn-primary w-100 mt-2 py-3 fw-bold rounded-3 shadow-sm">
+                            <span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i>
                         </button>
 
-                        <div id="actionButtons" class="row mt-3 g-2"
-                            style="display:none">
-                            <div class="col-4"><a id="pdfLink"
-                                    class="btn btn-outline-light w-100 btn-sm"><i
-                                        class="fas fa-file-pdf"></i>
-                                    PDF</a></div>
-                            <div class="col-4"><button onclick="printReceipt()"
-                                    class="btn btn-outline-warning w-100 btn-sm"><i
-                                        class="fas fa-print"></i> <span
-                                        data-i18n="btn_print">Print</span></button></div>
-                            <div class="col-4"><button onclick="saveTelegram()"
-                                    class="btn btn-outline-info w-100 btn-sm"><i
-                                        class="fab fa-telegram"></i> <span
-                                        data-i18n="btn_save">Save</span></button></div>
+                        <div id="actionButtons" class="row mt-2 g-2" style="display:none">
+                            <div class="col-6"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
+                            <div class="col-6"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 btn-sm"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-center align-items-center bg-dark border border-secondary border-opacity-25 rounded-3 py-2 text-muted">
+                                <i class="fas fa-users me-2"></i> <span data-i18n="people_count">Customers</span>: <strong class="text-success ms-2 fs-5" id="peopleCount">...</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
-                    <div class="glass-card text-center mb-3 py-3">
-                        <h6 class="text-muted text-uppercase small mb-1"
-                            data-i18n="people_count">People Exchanged Today</h6>
-                        <h1 class="display-5 fw-bold text-success mb-0"
-                            id="peopleCount">...</h1>
-                    </div>
-
-                    <div class="glass-card">
-                        <div
-                            class="d-flex justify-content-between align-items-center mb-3">
-                            <ul class="nav nav-pills custom-pills"
-                                role="tablist">
-                                <li class="nav-item"><button
-                                        class="nav-link active"
-                                        data-bs-toggle="pill"
-                                        data-bs-target="#content-rates"><i
-                                            class="fas fa-chart-line me-2"></i>Live
-                                        Rates</button></li>
-                                <li class="nav-item"><button class="nav-link"
-                                        data-bs-toggle="pill"
-                                        data-bs-target="#content-convert"><i
-                                            class="fas fa-calculator me-2"></i>Quick
-                                        Convert</button></li>
+                <div class="col-lg-7">
+                    <div class="glass-card main-card pb-1">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <ul class="nav nav-pills custom-pills" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#content-rates"><i class="fas fa-chart-line me-2"></i>Rates</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#content-convert"><i class="fas fa-calculator me-2"></i>Quick Convert</button>
+                                </li>
                             </ul>
-                            <button
-                                class="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                                onclick="toggleEditRates()" id="editRatesBtn"><i
-                                    class="fas fa-pen me-1"></i> Edit</button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 ms-2" onclick="toggleEditRates()" id="editRatesBtn"><i class="fas fa-pen me-1"></i> Edit</button>
                         </div>
 
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active"
-                                id="content-rates">
+                        <div class="tab-content border-bottom border-secondary border-opacity-25 pb-3 mb-3">
+                            <div class="tab-pane fade show active" id="content-rates">
                                 <div class="table-responsive">
-                                    <table
-                                        class="table table-borderless rate-table align-middle m-0 text-white">
-                                        <thead
-                                            class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th
-                                                    class="text-end">Rate</th></tr></thead>
+                                    <table class="table table-borderless rate-table align-middle m-0 text-white">
+                                        <thead class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th class="text-end">Rate</th></tr></thead>
                                         <tbody>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/us.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">USD/KHR</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="usd_khr"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="4008" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/us.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">USD/THB</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="usd_thb"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="31.44" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/kh.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">KHR/USD</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="khr_usd"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="4021" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/kh.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">KHR/THB</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="khr_thb"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="127.6" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/th.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">THB/USD</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="thb_usd"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="31.82" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div
-                                                        class="d-flex align-items-center gap-2"><img
-                                                            src="https://flagcdn.com/th.svg"
-                                                            width="20"><small
-                                                            class="fw-bold">THB/KHR</small></div></td><td
-                                                    class="text-end"><input
-                                                        id="thb_khr"
-                                                        type="number"
-                                                        class="rate-input"
-                                                        value="127.6" readonly
-                                                        oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/KHR</small></div></td><td class="text-end"><input id="usd_khr" type="number" class="rate-input" value="4008" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/THB</small></div></td><td class="text-end"><input id="usd_thb" type="number" class="rate-input" value="31.44" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/USD</small></div></td><td class="text-end"><input id="khr_usd" type="number" class="rate-input" value="4021" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/THB</small></div></td><td class="text-end"><input id="khr_thb" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/USD</small></div></td><td class="text-end"><input id="thb_usd" type="number" class="rate-input" value="31.82" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/KHR</small></div></td><td class="text-end"><input id="thb_khr" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
 
                             <div class="tab-pane fade" id="content-convert">
-                                <div class="p-2">
-                                    <ul class="nav nav-pills qc-pills mb-3"
-                                        id="qcTabs" role="tablist">
-                                        <li class="nav-item"><button
-                                                class="nav-link active"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-usd-khr">USD/KHR</button></li>
-                                        <li class="nav-item"><button
-                                                class="nav-link"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-usd-thb">USD/THB</button></li>
-                                        <li class="nav-item"><button
-                                                class="nav-link"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-khr-usd">KHR/USD</button></li>
-                                        <li class="nav-item"><button
-                                                class="nav-link"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-khr-thb">KHR/THB</button></li>
-                                        <li class="nav-item"><button
-                                                class="nav-link"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-thb-usd">THB/USD</button></li>
-                                        <li class="nav-item"><button
-                                                class="nav-link"
-                                                data-bs-toggle="pill"
-                                                data-bs-target="#qc-thb-khr">THB/KHR</button></li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div class="tab-pane fade show active"
-                                            id="qc-usd-khr"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-usd-khr"></tbody></table></div>
-                                        <div class="tab-pane fade"
-                                            id="qc-usd-thb"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-usd-thb"></tbody></table></div>
-                                        <div class="tab-pane fade"
-                                            id="qc-khr-usd"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-khr-usd"></tbody></table></div>
-                                        <div class="tab-pane fade"
-                                            id="qc-khr-thb"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-khr-thb"></tbody></table></div>
-                                        <div class="tab-pane fade"
-                                            id="qc-thb-usd"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-thb-usd"></tbody></table></div>
-                                        <div class="tab-pane fade"
-                                            id="qc-thb-khr"><table
-                                                class="table table-dark table-bordered text-center m-0"><tbody
-                                                    id="table-thb-khr"></tbody></table></div>
-                                    </div>
+                                <ul class="nav nav-pills qc-pills mb-3" id="qcTabs" role="tablist">
+                                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qc-usd-khr">USD/KHR</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-usd-thb">USD/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-usd">KHR/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-thb">KHR/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-usd">THB/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-khr">THB/KHR</button></li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="qc-usd-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-khr"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-usd-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-thb"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-khr-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-usd"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-khr-thb"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-khr-thb"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-thb-usd"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-usd"></tbody></table></div>
+                                    <div class="tab-pane fade" id="qc-thb-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-thb-khr"></tbody></table></div>
                                 </div>
                             </div>
                         </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold mb-0 text-white"><i class="fas fa-wallet me-2"></i> សមតុល្យ (Balances)</h5>
+                                <button class="btn btn-sm btn-outline-info" onclick="saveBalancesPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                            </div>
+                            
+                            <div id="printBalancesSection" class="pdf-export-container">
+                                <h4 id="pdfBalTitle" class="d-none mb-3 text-center fw-bold">របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ</h4>
+                                <table class="table table-dark table-bordered align-middle mb-0 text-center">
+                                    <thead>
+                                        <tr class="text-secondary">
+                                            <th>រូបិយប័ណ្ណ (Currency)</th>
+                                            <th>ចំនួន (Amount)</th>
+                                            <th class="no-pdf" style="width: 140px;">កែប្រែ (Action)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balancesList">
+                                        </tbody>
+                                    <tfoot id="pnlSection" class="border-top border-secondary bg-dark bg-opacity-50">
+                                        </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -364,31 +238,40 @@
 
         <div class="modal fade" id="historyModal" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-centered">
-                <div
-                    class="modal-content glass-card p-0 overflow-hidden border-0">
-                    <div
-                        class="modal-header border-bottom border-secondary border-opacity-25">
-                        <h5 class="fw-bold"
-                            data-i18n="history_title">History</h5>
-                        <button type="button" class="btn-close btn-close-white"
-                            data-bs-dismiss="modal"></button>
+                <div class="modal-content glass-card p-0 overflow-hidden border-0">
+                    <div class="modal-header border-bottom border-secondary border-opacity-25">
+                        <h5 class="fw-bold" data-i18n="history_title">History</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="d-flex justify-content-between mb-3">
-                            <input type="text" id="searchInput"
-                                class="form-control form-control-sm bg-dark text-white border-secondary w-auto"
-                                placeholder="Search..."
-                                onkeyup="searchHistory()">
-                            <button class="btn btn-sm btn-outline-danger"
-                                onclick="deleteAll()">Delete All</button>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <input type="radio" class="btn-check" name="histFilter" id="histDay" autocomplete="off" checked onchange="currentHistFilter='day'; loadHistory()">
+                                <label class="btn btn-outline-primary" for="histDay">Day</label>
+                              
+                                <input type="radio" class="btn-check" name="histFilter" id="histWeek" autocomplete="off" onchange="currentHistFilter='week'; loadHistory()">
+                                <label class="btn btn-outline-primary" for="histWeek">Week</label>
+                              
+                                <input type="radio" class="btn-check" name="histFilter" id="histMonth" autocomplete="off" onchange="currentHistFilter='month'; loadHistory()">
+                                <label class="btn btn-outline-primary" for="histMonth">Month</label>
+                            </div>
+
+                            <div>
+                                <button class="btn btn-sm btn-outline-info me-2" onclick="saveHistoryPDF()"><i class="fas fa-file-pdf"></i> Save PDF</button>
+                                <button class="btn btn-sm btn-outline-danger me-2" onclick="deleteAll()">Delete All</button>
+                                <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary d-inline-block" style="width: 150px;" placeholder="Search..." onkeyup="searchHistory()">
+                            </div>
                         </div>
-                        <div class="table-responsive" style="max-height: 50vh;">
-                            <table
-                                class="table table-dark table-sm align-middle mb-0">
-                                <thead><tr class="text-secondary"><th
-                                            data-i18n="col_time">Time</th><th>In</th><th>Out</th><th>Rate</th><th>Action</th></tr></thead>
-                                <tbody id="historyList"></tbody>
-                            </table>
+
+                        <div class="table-responsive" style="max-height: 55vh;">
+                            <div id="printHistorySection" class="pdf-export-container">
+                                <h4 id="pdfHistTitle" class="d-none mb-3 text-center fw-bold">ប្រវត្តិប្រតិបត្តិការ</h4>
+                                <table class="table table-dark table-sm table-bordered align-middle mb-0 text-center" id="histTable">
+                                    <thead><tr class="text-secondary"><th data-i18n="col_date">Date</th><th>In</th><th>Out</th><th>Fee</th><th>Rate</th><th class="action-col">Action</th></tr></thead>
+                                    <tbody id="historyList"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -402,9 +285,7 @@
                 <div class="r-big-num">ផ្លូវមិត្តភាព​ បុរី Good Luck</div>
                 <div class="r-contact">Tel: 085 63 68 98 , 085 20 30 00</div>
             </div>
-
             <div class="r-invoice-title">វិក្កយបត្រ</div>
-
             <div class="r-meta-row">
                 <div>
                     លេខវិក្កយបត្រ: <span id="rId"></span><br>
@@ -412,30 +293,30 @@
                     <span id="rTime"></span>
                 </div>
             </div>
-
             <div class="r-row" style="margin-top: 5px;">
                 <div class="r-big-num">ចំនួនទឹកប្រាក់ប្តូរ</div>
                 <div class="r-sep">:</div>
                 <div class="r-val" id="rIn"></div>
             </div>
-
             <div class="r-row">
                 <div class="r-big-num">អត្រាប្តូរប្រាក់</div>
                 <div class="r-sep">:</div>
                 <div class="r-val" id="rRate"></div>
             </div>
-
             <div class="r-row">
                 <div class="r-big-num">ចំនួនទឹកប្រាក់សរុប</div>
                 <div class="r-sep">:</div>
                 <div class="r-val" id="rOut"></div>
             </div>
-
+            <div class="r-row" id="rFeeRow" style="display:none">
+                <div class="r-big-num">សេវាកម្ម (Fee)</div>
+                <div class="r-sep">:</div>
+                <div class="r-val" id="rFee"></div>
+            </div>
             <div class="r-total-row">
                 <div>ចំនួនទឹកប្រាក់ទទួល</div>
                 <div id="rRec"></div>
             </div>
-
             <div class="r-box">
                 សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>
                 សូមអរគុណ!<br>
@@ -443,11 +324,9 @@
             </div>
         </div>
 
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-        // Removed customer related keys from i18n
-        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "People Exchanged Today", history_title: "History", col_time: "Time" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "ចំនួនអ្នកប្តូរប្រាក់ថ្ងៃនេះ", history_title: "ប្រវត្តិ", col_time: "ម៉ោង" } };
+        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", fee: "Fee (៛)", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "Customers", history_title: "History", col_date: "Date" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", fee: "សេវាកម្ម (៛)", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "អតិថិជន", history_title: "ប្រវត្តិ", col_date: "កាលបរិច្ឆេទ" } };
         
         function setLang(lang) { 
             localStorage.setItem('lang', lang); 
@@ -455,7 +334,6 @@
                 const k = el.getAttribute('data-i18n'); 
                 if(i18n[lang][k]) el.innerText = i18n[lang][k]; 
             }); 
-            // Removed customer placeholder update
         }
 
         function toggleEditRates() { 
@@ -496,6 +374,71 @@
         let latestTx = null; 
         const SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'};
 
+        // Formatting Date logic
+        function getFormattedDateDay(dateInput = null) {
+            const d = dateInput ? new Date(dateInput) : new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+            return `${yyyy}-${mm}-${dd} (${dayName})`;
+        }
+
+        // Load Balances and PnL Table
+        async function loadBalances() {
+            const res = await fetch('/balances');
+            const data = await res.json();
+            const container = document.getElementById('balancesList');
+            const pnlContainer = document.getElementById('pnlSection');
+            
+            container.innerHTML = '';
+            
+            ['USD', 'THB', 'KHR'].forEach(curr => {
+                if(data[curr] !== undefined) {
+                    const sym = SYMBOLS[curr] || '';
+                    container.innerHTML += `
+                        <tr>
+                            <td class="fs-6 fw-bold text-white">${sym} ${curr}</td>
+                            <td class="fs-6 fw-bold text-info">${data[curr].toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td class="no-pdf">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <input type="number" id="bal_adj_${curr}" class="form-control form-control-sm bg-dark text-white border-secondary px-1" style="width: 55px" placeholder="Amt">
+                                    <button class="btn btn-sm btn-outline-success px-2" onclick="adjustBalance('${curr}', 1)"><i class="fas fa-plus"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger px-2" onclick="adjustBalance('${curr}', -1)"><i class="fas fa-minus"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            // Populate Profit & Loss (Fees collected today)
+            const profit = parseFloat(data['PROFIT_KHR']) || 0;
+            const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
+            
+            pnlContainer.innerHTML = `
+                <tr>
+                    <td class="fs-6 fw-bold text-white py-3">ប្រាក់ចំណេញថ្ងៃនេះ<br><small class="text-muted">(Today's Profit/Fees)</small></td>
+                    <td colspan="2" class="fs-5 fw-bold ${profitClass} py-3 align-middle">${profit.toLocaleString()} ៛</td>
+                </tr>
+            `;
+        }
+
+        async function adjustBalance(curr, multiplier) {
+            const amtStr = document.getElementById(`bal_adj_${curr}`).value;
+            const amt = parseFloat(amtStr);
+            if(isNaN(amt) || amt <= 0) return;
+            
+            const finalAmt = amt * multiplier;
+            await fetch('/update_balance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({currency: curr, amount: finalAmt})
+            });
+            document.getElementById(`bal_adj_${curr}`).value = '';
+            loadBalances();
+        }
+
         function updateUI() { 
             const f = document.getElementById('fromCurrency').value; 
             const t = document.getElementById('toCurrency').value; 
@@ -531,8 +474,8 @@
                 from: document.getElementById('fromCurrency').value, 
                 to: document.getElementById('toCurrency').value, 
                 amount: document.getElementById('fromAmount').value, 
+                fee: document.getElementById('feeAmount').value,
                 rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]
-                // Removed customer, phone, address from payload
             }; 
             
             const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); 
@@ -540,9 +483,12 @@
             
             if(json.success) { 
                 document.getElementById('actionButtons').style.display = 'flex'; 
-                document.getElementById('pdfLink').href = json.pdf_url; 
-                latestTx = {...data, total: json.total, op: json.op}; 
+                latestTx = {...data, total: json.total, op: json.op, fee: data.fee}; 
                 updateStats(); 
+                loadBalances();
+
+                saveTelegram();
+                setTimeout(() => { printReceipt(); }, 100); 
             } 
         }
 
@@ -554,7 +500,6 @@
 
         function printReceipt() { 
             if(!latestTx) return; 
-            
             const now = new Date();
             const dateStr = now.toLocaleDateString('en-GB'); 
             const timeStr = now.toLocaleTimeString('en-GB'); 
@@ -564,8 +509,6 @@
             document.getElementById('rDate').innerText = dateStr;
             document.getElementById('rTime').innerText = timeStr;
             
-            // Removed customer/address/phone filling logic
-
             const symFrom = SYMBOLS[latestTx.from] || latestTx.from;
             const symOut = SYMBOLS[latestTx.to] || latestTx.to;
             
@@ -576,31 +519,84 @@
             document.getElementById('rOut').innerText = totalOut;
             document.getElementById('rRec').innerText = totalOut;
 
+            const fee = parseFloat(latestTx.fee) || 0;
+            if(fee > 0) {
+                document.getElementById('rFeeRow').style.display = 'flex';
+                document.getElementById('rFee').innerText = fee.toLocaleString() + ' ៛';
+            } else {
+                document.getElementById('rFeeRow').style.display = 'none';
+            }
+
             const r = document.getElementById('printReceipt'); 
             r.style.display = 'block'; 
             window.print(); 
             r.style.display = 'none'; 
         }
         
+        let currentHistFilter = 'day';
+
         async function loadHistory() { 
-            const res = await fetch(`/history?period=all&pair=all`); 
+            const res = await fetch(`/history?period=${currentHistFilter}&pair=all`); 
             const list = await res.json(); 
             const tbody = document.getElementById('historyList'); 
             tbody.innerHTML = ''; 
             list.forEach(item => { 
-                // Removed customer name column
-                tbody.innerHTML += `<tr><td><div class="small text-white">${item.date}</div></td><td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td><td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td><td>${item.rate}</td><td><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
+                let feeHtml = item.fee > 0 ? `<span class="badge bg-warning text-dark">${item.fee} ៛</span>` : '-';
+                
+                // Format Date & Day only
+                const dateDayStr = getFormattedDateDay(item.date);
+
+                tbody.innerHTML += `<tr>
+                    <td><div class="small fw-bold text-white">${dateDayStr}</div></td>
+                    <td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td>
+                    <td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td>
+                    <td>${feeHtml}</td>
+                    <td>${item.rate}</td>
+                    <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>`; 
             }); 
         }
         
-        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); }
-        async function deleteAll() { if(confirm('Delete All?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); } }
+        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); loadBalances(); }
+        async function deleteAll() { if(confirm('Delete All Filtered Records?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); loadBalances(); } }
         function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
-        async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); alert('Sent to Telegram!'); }
+        async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); }
+
+        // --- PDF GENERATION USING HTML2PDF ---
+        function saveHistoryPDF() {
+            document.querySelectorAll('.action-col').forEach(el => el.style.display = 'none');
+            
+            const dateDay = getFormattedDateDay();
+            document.getElementById('pdfHistTitle').classList.remove('d-none');
+            document.getElementById('pdfHistTitle').innerText = `ប្រវត្តិប្រតិបត្តិការ - ${dateDay}`;
+
+            const element = document.getElementById('printHistorySection');
+            const opt = { margin: 10, filename: `Exchange_History_${currentHistFilter}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f172a' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.querySelectorAll('.action-col').forEach(el => el.style.display = '');
+                document.getElementById('pdfHistTitle').classList.add('d-none');
+            });
+        }
+
+        function saveBalancesPDF() {
+            document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
+            
+            const dateDay = getFormattedDateDay();
+            document.getElementById('pdfBalTitle').classList.remove('d-none');
+            document.getElementById('pdfBalTitle').innerText = `របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ - ${dateDay}`;
+
+            const element = document.getElementById('printBalancesSection');
+            const opt = { margin: 10, filename: `Balances_Report.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f172a' }, jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } };
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.querySelectorAll('.no-pdf').forEach(el => el.style.display = '');
+                document.getElementById('pdfBalTitle').classList.add('d-none');
+            });
+        }
 
         document.getElementById('fromAmount').addEventListener('input', updateUI);
-        updateUI(); updateStats(); setLang('en'); updateQuickTable();
-        document.getElementById('darkToggle').addEventListener('click', () => { const h = document.documentElement; h.setAttribute('data-bs-theme', h.getAttribute('data-bs-theme')==='dark'?'light':'dark'); });
+        updateUI(); updateStats(); setLang('km'); updateQuickTable(); loadBalances();
     </script>
     </body>
 </html>
