@@ -42,8 +42,12 @@
         .qc-pills .nav-link { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; margin-right: 5px; }
         .qc-pills .nav-link.active { background: var(--text-main); color: var(--accent-color); font-weight: 700; }
 
-        /* Print formatting */
-        .pdf-export-container { padding: 15px; background: #0f172a; color: white; border-radius: 10px; font-family: 'Noto Sans Khmer', sans-serif; }
+        /* Dark Mode PDF Export Styling (Matches Screenshot) */
+        .pdf-export-container { padding: 15px; background: transparent; color: white; border-radius: 10px; font-family: 'Noto Sans Khmer', sans-serif; }
+        
+        .dark-pdf-mode { background-color: #1a1d20 !important; color: #ffffff !important; padding: 20px !important; border-radius: 0 !important; }
+        .dark-pdf-mode table { border-color: #373b3e !important; }
+        .dark-pdf-mode th, .dark-pdf-mode td { border-color: #373b3e !important; }
         
         /* --- THERMAL PRINTER CSS --- */
         @media print {
@@ -217,7 +221,7 @@
                                 <h4 id="pdfBalTitle" class="d-none mb-3 text-center fw-bold">របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ</h4>
                                 <table class="table table-dark table-bordered align-middle mb-0 text-center">
                                     <thead>
-                                        <tr class="text-secondary">
+                                        <tr>
                                             <th>រូបិយប័ណ្ណ (Currency)</th>
                                             <th>ចំនួន (Amount)</th>
                                             <th class="no-pdf" style="width: 140px;">កែប្រែ (Action)</th>
@@ -268,7 +272,7 @@
                             <div id="printHistorySection" class="pdf-export-container">
                                 <h4 id="pdfHistTitle" class="d-none mb-3 text-center fw-bold">ប្រវត្តិប្រតិបត្តិការ</h4>
                                 <table class="table table-dark table-sm table-bordered align-middle mb-0 text-center" id="histTable">
-                                    <thead><tr class="text-secondary"><th data-i18n="col_date">Date</th><th>In</th><th>Out</th><th>Fee</th><th>Rate</th><th class="action-col">Action</th></tr></thead>
+                                    <thead><tr><th>កាលបរិច្ឆេទ</th><th>In</th><th>Out</th><th>Fee</th><th>Rate</th><th class="action-col">Action</th></tr></thead>
                                     <tbody id="historyList"></tbody>
                                 </table>
                             </div>
@@ -326,7 +330,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", fee: "Fee (៛)", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "Customers", history_title: "History", col_date: "Date" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", fee: "សេវាកម្ម (៛)", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "អតិថិជន", history_title: "ប្រវត្តិ", col_date: "កាលបរិច្ឆេទ" } };
+        const i18n = { en: { new_tx: "New Transaction", rate: "Rate", fee: "Fee (៛)", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "Customers", history_title: "History" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", fee: "សេវាកម្ម (៛)", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "អតិថិជន", history_title: "ប្រវត្តិ" } };
         
         function setLang(lang) { 
             localStorage.setItem('lang', lang); 
@@ -372,9 +376,8 @@
         }
 
         let latestTx = null; 
-        const SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'};
+        const SYMBOLS = {'USD': 'USD', 'KHR': 'KHR', 'THB': 'THB'};
 
-        // Formatting Date logic
         function getFormattedDateDay(dateInput = null) {
             const d = dateInput ? new Date(dateInput) : new Date();
             const yyyy = d.getFullYear();
@@ -398,7 +401,7 @@
                     const sym = SYMBOLS[curr] || '';
                     container.innerHTML += `
                         <tr>
-                            <td class="fs-6 fw-bold text-white">${sym} ${curr}</td>
+                            <td class="fs-6 fw-bold text-white">${sym}</td>
                             <td class="fs-6 fw-bold text-info">${data[curr].toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                             <td class="no-pdf">
                                 <div class="d-flex gap-1 justify-content-center">
@@ -418,7 +421,7 @@
             
             pnlContainer.innerHTML = `
                 <tr>
-                    <td class="fs-6 fw-bold text-white py-3">ប្រាក់ចំណេញថ្ងៃនេះ<br><small class="text-muted">(Today's Profit/Fees)</small></td>
+                    <td class="fs-6 fw-bold text-white py-3">ប្រាក់ចំណេញថ្ងៃនេះ<br><small class="text-white">(Today's Profit/Fees)</small></td>
                     <td colspan="2" class="fs-5 fw-bold ${profitClass} py-3 align-middle">${profit.toLocaleString()} ៛</td>
                 </tr>
             `;
@@ -541,17 +544,15 @@
             const tbody = document.getElementById('historyList'); 
             tbody.innerHTML = ''; 
             list.forEach(item => { 
-                let feeHtml = item.fee > 0 ? `<span class="badge bg-warning text-dark">${item.fee} ៛</span>` : '-';
-                
-                // Format Date & Day only
+                let feeHtml = item.fee > 0 ? `<span class="text-white">${item.fee}</span>` : '-';
                 const dateDayStr = getFormattedDateDay(item.date);
 
                 tbody.innerHTML += `<tr>
-                    <td><div class="small fw-bold text-white">${dateDayStr}</div></td>
+                    <td><div class="fw-bold text-white">${dateDayStr}</div></td>
                     <td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td>
                     <td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td>
-                    <td>${feeHtml}</td>
-                    <td>${item.rate}</td>
+                    <td><div class="text-white">${feeHtml}</div></td>
+                    <td><div class="text-white">${item.rate}</div></td>
                     <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>`; 
             }); 
@@ -571,11 +572,20 @@
             document.getElementById('pdfHistTitle').innerText = `ប្រវត្តិប្រតិបត្តិការ - ${dateDay}`;
 
             const element = document.getElementById('printHistorySection');
-            const opt = { margin: 10, filename: `Exchange_History_${currentHistFilter}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f172a' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            element.classList.add('dark-pdf-mode');
+
+            const opt = { 
+                margin: 10, 
+                filename: `Exchange_History_${currentHistFilter}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
             
             html2pdf().set(opt).from(element).save().then(() => {
                 document.querySelectorAll('.action-col').forEach(el => el.style.display = '');
                 document.getElementById('pdfHistTitle').classList.add('d-none');
+                element.classList.remove('dark-pdf-mode');
             });
         }
 
@@ -583,15 +593,25 @@
             document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
             
             const dateDay = getFormattedDateDay();
-            document.getElementById('pdfBalTitle').classList.remove('d-none');
-            document.getElementById('pdfBalTitle').innerText = `របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ - ${dateDay}`;
+            const titleEl = document.getElementById('pdfBalTitle');
+            titleEl.classList.remove('d-none');
+            titleEl.innerText = `របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ - ${dateDay}`;
 
             const element = document.getElementById('printBalancesSection');
-            const opt = { margin: 10, filename: `Balances_Report.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f172a' }, jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } };
+            element.classList.add('dark-pdf-mode');
+
+            const opt = { 
+                margin: 10, 
+                filename: `Balances_Report.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, 
+                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } 
+            };
             
             html2pdf().set(opt).from(element).save().then(() => {
                 document.querySelectorAll('.no-pdf').forEach(el => el.style.display = '');
-                document.getElementById('pdfBalTitle').classList.add('d-none');
+                titleEl.classList.add('d-none');
+                element.classList.remove('dark-pdf-mode');
             });
         }
 
