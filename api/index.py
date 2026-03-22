@@ -287,7 +287,6 @@ def history_route():
             'rate': r[7], 'fee': fee
         })
     return jsonify(history_data)
-
 @app.route('/save_to_telegram', methods=['POST'])
 def save_to_telegram():
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: 
@@ -304,23 +303,23 @@ def save_to_telegram():
         op = d.get('op', '×') 
 
         msg = f"""
-<b>Saved Record – DPK EXCHANGE</b>
-{now}
+<b>🏦 វិក្កយបត្រ – DPK EXCHANGE</b>
+📅 {now}
 
-From: {amount:,.2f} {sym_from} ({d['from']})
-To: {total:,.2f} {sym_to} ({d['to']})
-Rate: 1 {d['from']} = {rate:,.4f} {d['to']}
-Calculation: {amount:,.2f} {op} {rate:,.4f} = {total:,.2f}
+📤 <b>ប្រាក់ប្តូរ:</b> {amount:,.2f} {sym_from} ({d['from']})
+📥 <b>ទទួលបាន:</b> {total:,.2f} {sym_to} ({d['to']})
+📊 <b>អត្រាប្តូរប្រាក់:</b> 1 {d['from']} = {rate:,.4f} {d['to']}
+🧮 <b>ការគណនា:</b> {amount:,.2f} {op} {rate:,.4f} = {total:,.2f}
         """.strip()
         
         if fee > 0:
-            msg += f"\nFee: {fee:,.0f} ៛"
+            msg += f"\n💸 <b>សេវាកម្ម (Fee):</b> {fee:,.0f} ៛"
             
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
         payload = {"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "HTML"}
         requests.post(url, json=payload, timeout=10)
         return jsonify({'success': True})
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
-
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
