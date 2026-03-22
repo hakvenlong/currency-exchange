@@ -1,104 +1,168 @@
 from flask import Flask, render_template, request, jsonify
 import datetime
 import os
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import requests
-import platform
+from dotenv import load_dotenv
+
+# Find and load the exact path for local testing
+try:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env_path = os.path.join(BASE_DIR, '.env.development.local')
+    load_dotenv(env_path)
+except:
+    pass # Will gracefully skip on Vercel production
 
 app = Flask(__name__, template_folder='../templates')
 
-# --- CONFIGURATION ---
-if platform.system() == 'Windows':
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DB_FILE = os.path.join(BASE_DIR, 'exchange.db')
-else:
-    DB_FILE = '/tmp/exchange.db'
+# --- DATABASE CONNECTION ---
+def get_db_connection():
+    # Look for DATABASE_URL (Neon) first, fallback to standard Vercel POSTGRES_URL
+    db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
+    if not db_url:
+        raise ValueError("CRITICAL ERROR: Database URL is missing! Check your environment variables.")
+        
+    conn = psycopg2.connect(db_url)
+    return conn
 
 SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'}
 
 # --- DATABASE SETUP ---
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
+    
+    # Create transactions table
     c.execute('''CREATE TABLE IF NOT EXISTS transactions 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                 (id SERIAL PRIMARY KEY, 
                   date TEXT, timestamp TEXT, 
                   from_curr TEXT, to_curr TEXT, 
                   amount_in REAL, amount_out REAL, 
                   rate REAL, op TEXT,
                   market TEXT, fee REAL DEFAULT 0)''')
                   
-    try:
-        c.execute("ALTER TABLE transactions ADD COLUMN fee REAL DEFAULT 0")
-    except:
-        pass 
-        
+    # Create balances table
     c.execute('''CREATE TABLE IF NOT EXISTS balances (currency TEXT PRIMARY KEY, amount REAL)''')
-    c.execute("INSERT OR IGNORE INTO balances (currency, amount) VALUES ('USD', 0), ('KHR', 0), ('THB', 0)")
+    c.execute("INSERT INTO balances (currency, amount) VALUES ('USD', 0) ON CONFLICT (currency) DO NOTHING")
+    c.execute("INSERT INTO balances (currency, amount) VALUES ('KHR', 0) ON CONFLICT (currency) DO NOTHING")
+    c.execute("INSERT INTO balances (currency, amount) VALUES ('THB', 0) ON CONFLICT (currency) DO NOTHING")
     
+    # Create rates table for persistent F5 refresh
+    c.execute('''CREATE TABLE IF NOT EXISTS rates (pair TEXT PRIMARY KEY, rate REAL)''')
+    default_rates = [('usd_khr', 4008), ('usd_thb', 31.44), ('khr_usd', 4021), ('khr_thb', 127.6), ('thb_usd', 31.82), ('thb_khr', 127.6)]
+    for pair, rate in default_rates:
+        c.execute("INSERT INTO rates (pair, rate) VALUES (%s, %s) ON CONFLICT (pair) DO NOTHING", (pair, rate))
+
     conn.commit()
+    c.close()
     conn.close()
 
-init_db()
+# Initialize tables securely on startup
+try:
+    init_db()
+except Exception as e:
+    print("Database init error:", e)
 
 # --- DATABASE HELPERS ---
 def log_transaction(data):
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
     now = datetime.datetime.now()
     c.execute("""
         INSERT INTO transactions 
         (date, timestamp, from_curr, to_curr, amount_in, amount_out, rate, op, market, fee) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), 
           data['from'], data['to'], data['amount'], data['total'], 
           data['rate'], data['op'], '', data['fee']))
     conn.commit()
+    c.close()
     conn.close()
 
 def get_filtered_history(period='day', pair='all'):
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
     query = "SELECT * FROM transactions WHERE 1=1"
     params = []
     
     today = datetime.date.today()
     if period == 'day':
-        query += " AND date = ?"
+        query += " AND date = %s"
         params.append(today.strftime("%Y-%m-%d"))
     elif period == 'week':
         start = today - datetime.timedelta(days=7)
-        query += " AND date >= ?"
+        query += " AND date >= %s"
         params.append(start.strftime("%Y-%m-%d"))
     elif period == 'month':
         start = today - datetime.timedelta(days=30)
-        query += " AND date >= ?"
+        query += " AND date >= %s"
         params.append(start.strftime("%Y-%m-%d"))
     
     if pair != 'all':
         f, t = pair.split('_')
-        query += " AND from_curr = ? AND to_curr = ?"
+        query += " AND from_curr = %s AND to_curr = %s"
         params.extend([f, t])
 
     query += " ORDER BY id DESC LIMIT 200"
-    c.execute(query, params)
+    c.execute(query, tuple(params))
     rows = c.fetchall()
+    c.close()
     conn.close()
     return rows
 
-def get_daily_stats():
-    conn = sqlite3.connect(DB_FILE)
+def get_all_stats():
+    conn = get_db_connection()
     c = conn.cursor()
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    c.execute("SELECT COUNT(*) FROM transactions WHERE date = ?", (today,))
-    total_people = c.fetchone()[0]
+    today = datetime.date.today()
+    week_start = today - datetime.timedelta(days=7)
+    month_start = today - datetime.timedelta(days=30)
+    
+    # Day Customers
+    c.execute("SELECT COUNT(*) FROM transactions WHERE date = %s", (today.strftime("%Y-%m-%d"),))
+    day_count = c.fetchone()[0]
+    
+    # Week Customers
+    c.execute("SELECT COUNT(*) FROM transactions WHERE date >= %s", (week_start.strftime("%Y-%m-%d"),))
+    week_count = c.fetchone()[0]
+    
+    # Month Customers
+    c.execute("SELECT COUNT(*) FROM transactions WHERE date >= %s", (month_start.strftime("%Y-%m-%d"),))
+    month_count = c.fetchone()[0]
+    
+    c.close()
     conn.close()
-    return {}, total_people
+    return {'day': day_count, 'week': week_count, 'month': month_count}
 
 # --- ROUTES ---
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/rates', methods=['GET'])
+def get_rates():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT pair, rate FROM rates")
+    rates = {row[0]: row[1] for row in c.fetchall()}
+    c.close()
+    conn.close()
+    return jsonify(rates)
+
+@app.route('/update_rates', methods=['POST'])
+def update_rates():
+    try:
+        data = request.json
+        conn = get_db_connection()
+        c = conn.cursor()
+        for pair, rate in data.items():
+            c.execute("UPDATE rates SET rate = %s WHERE pair = %s", (float(rate), pair))
+        conn.commit()
+        c.close()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e: 
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/exchange', methods=['POST'])
 def exchange():
@@ -121,14 +185,15 @@ def exchange():
         log_transaction(data)
         
         # Update Balances
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("UPDATE balances SET amount = amount + ? WHERE currency = ?", (data['amount'], data['from']))
-        c.execute("UPDATE balances SET amount = amount - ? WHERE currency = ?", (data['total'], data['to']))
+        c.execute("UPDATE balances SET amount = amount + %s WHERE currency = %s", (data['amount'], data['from']))
+        c.execute("UPDATE balances SET amount = amount - %s WHERE currency = %s", (data['total'], data['to']))
         if data['fee'] > 0:
-            c.execute("UPDATE balances SET amount = amount + ? WHERE currency = 'KHR'", (data['fee'],))
+            c.execute("UPDATE balances SET amount = amount + %s WHERE currency = 'KHR'", (data['fee'],))
             
         conn.commit()
+        c.close()
         conn.close()
         
         return jsonify({
@@ -140,16 +205,18 @@ def exchange():
 
 @app.route('/balances', methods=['GET'])
 def get_balances():
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT currency, amount FROM balances")
     rows = c.fetchall()
     
-    # Calculate today's profit (Total fees collected today)
+    # Calculate today's profit
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    c.execute("SELECT SUM(fee) FROM transactions WHERE date = ?", (today,))
-    profit = c.fetchone()[0] or 0
+    c.execute("SELECT SUM(fee) FROM transactions WHERE date = %s", (today,))
+    profit_result = c.fetchone()[0]
+    profit = profit_result if profit_result is not None else 0
     
+    c.close()
     conn.close()
     
     data = {row[0]: row[1] for row in rows}
@@ -163,10 +230,11 @@ def update_balance():
         currency = data['currency']
         amount = float(data['amount'])
         
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("UPDATE balances SET amount = amount + ? WHERE currency = ?", (amount, currency))
+        c.execute("UPDATE balances SET amount = amount + %s WHERE currency = %s", (amount, currency))
         conn.commit()
+        c.close()
         conn.close()
         return jsonify({'success': True})
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
@@ -174,10 +242,11 @@ def update_balance():
 @app.route('/delete_transaction/<int:tx_id>', methods=['DELETE'])
 def delete_transaction(tx_id):
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("DELETE FROM transactions WHERE id = ?", (tx_id,))
+        c.execute("DELETE FROM transactions WHERE id = %s", (tx_id,))
         conn.commit()
+        c.close()
         conn.close()
         return jsonify({'success': True})
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
@@ -185,18 +254,23 @@ def delete_transaction(tx_id):
 @app.route('/delete_all', methods=['DELETE'])
 def delete_all():
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("DELETE FROM transactions")
         conn.commit()
+        c.close()
         conn.close()
         return jsonify({'success': True})
     except Exception as e: return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/stats')
 def stats():
-    data, count = get_daily_stats()
-    return jsonify({'stats': data, 'count': count})
+    data = get_all_stats()
+    return jsonify(data)
+
+# --- TELEGRAM ---
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 @app.route('/history')
 def history_route():
@@ -213,10 +287,6 @@ def history_route():
             'rate': r[7], 'fee': fee
         })
     return jsonify(history_data)
-
-# --- TELEGRAM ---
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 @app.route('/save_to_telegram', methods=['POST'])
 def save_to_telegram():
