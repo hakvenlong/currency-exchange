@@ -14,13 +14,28 @@
             rel="stylesheet">
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+            
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
         <style>
-        :root { --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --accent-color: #818cf8; --text-main: #ffffff; }
+        :root { 
+            --glass-bg: rgba(30, 30, 40, 0.6); 
+            --glass-border: rgba(255, 255, 255, 0.08); 
+            --accent-color: #818cf8; 
+            --text-main: #ffffff;
+            --input-bg: rgba(255,255,255,0.03);
+            --input-border-color: rgba(255, 255, 255, 0.08);
+            --font-scale: 16px;
+        }
         
-        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', sans-serif; background: #0f172a; min-height: 100vh; color: var(--text-main); overflow-x: hidden; }
+        html { font-size: var(--font-scale); transition: font-size 0.2s ease; }
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', sans-serif; background: #0f172a; min-height: 100vh; color: var(--text-main); overflow-x: hidden; transition: padding-top 0.3s ease; }
         
+        /* Navbar Configurator Styles */
+        .navbar.overlay-menu { position: fixed; top: 0; left: 0; right: 0; z-index: 1030; background: rgba(15, 23, 42, 0.9) !important; backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass-border); }
+        .body-overlay-padding { padding-top: 80px; }
+
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
         
         .main-card { max-height: 85vh; overflow-y: auto; scrollbar-width: thin; }
@@ -28,12 +43,13 @@
         .main-card::-webkit-scrollbar-track { background: transparent; }
         .main-card::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
-        .currency-input-group { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 14px; padding: 0.8rem; display: flex; align-items: center; margin-bottom: 0.8rem; }
+        /* Configurable Inputs (Outlined vs Filled) */
+        .currency-input-group { background: var(--input-bg); border: 1px solid var(--input-border-color); border-radius: 14px; padding: 0.8rem; display: flex; align-items: center; margin-bottom: 0.8rem; transition: all 0.2s; }
         .amount-field { background: transparent; border: none; color: var(--text-main); font-size: 1.5rem; font-weight: 700; text-align: right; width: 100%; outline: none; }
         .currency-select select { background: transparent; border: none; color: var(--text-main); font-weight: 700; outline: none; margin-left: 8px; cursor: pointer; }
         select option { background: #1e293b; color: white; }
         
-        .rate-input { background: transparent; border: 1px solid transparent; color: var(--text-main); font-weight: 700; text-align: right; width: 80px; padding: 2px 5px; border-radius: 6px; }
+        .rate-input { background: var(--input-bg); border: 1px solid var(--input-border-color); color: var(--text-main); font-weight: 700; text-align: right; width: 80px; padding: 2px 5px; border-radius: 6px; transition: all 0.2s; }
         .rate-input:focus, .rate-input.editable { background: rgba(255,255,255,0.1); border-color: var(--accent-color); outline: none; }
         
         .custom-pills .nav-link { color: var(--text-main); border-radius: 12px; padding: 8px 16px; font-weight: 600; font-size: 0.9rem; margin-right: 5px; }
@@ -41,6 +57,14 @@
         .qc-pills { display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
         .qc-pills .nav-link { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; margin-right: 5px; }
         .qc-pills .nav-link.active { background: var(--text-main); color: var(--accent-color); font-weight: 700; }
+
+        /* Rates Table Width Constraint */
+        .rates-container table { max-width: 280px; }
+
+        /* Ripple Effect */
+        .ripple-enabled .btn { position: relative; overflow: hidden; transform: translate3d(0, 0, 0); }
+        .ripple-enabled .btn::after { content: ""; display: block; position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; background-image: radial-gradient(circle, #fff 10%, transparent 10.01%); background-repeat: no-repeat; background-position: 50%; transform: scale(10, 10); opacity: 0; transition: transform .5s, opacity 1s; }
+        .ripple-enabled .btn:active::after { transform: scale(0, 0); opacity: .3; transition: 0s; }
 
         /* Dark Mode PDF Export Styling */
         .pdf-export-container { padding: 15px; background: transparent; color: white; border-radius: 10px; font-family: 'Noto Sans Khmer', sans-serif; }
@@ -81,8 +105,8 @@
         }
     </style>
     </head>
-    <body>
-        <nav class="navbar navbar-expand p-3">
+    <body class="ripple-enabled" id="appBody">
+        <nav class="navbar navbar-expand p-3" id="mainNav">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold fs-4" href="#"><i
                         class="fas fa-wallet me-2 text-primary"></i>DPK Exchange</a>
@@ -95,18 +119,19 @@
                         </ul>
                     </div>
                     <button class="btn btn-dark rounded-circle" onclick="openHistory()" title="History"><i class="fas fa-history"></i></button>
+                    <button class="btn btn-dark rounded-circle" data-bs-toggle="offcanvas" data-bs-target="#configOffcanvas" title="Settings"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
         </nav>
 
         <div class="container py-2">
             <div class="row g-4">
-                <div class="col-lg-5">
+                <div class="col-lg-6">
                     <div class="glass-card main-card">
                         <h4 class="mb-3 fw-bold" data-i18n="new_tx">New Transaction</h4>
 
                         <div class="currency-input-group">
-                            <img id="fromFlag" src="https://flagcdn.com/us.svg" width="28">
+                            <img id="fromFlag" src="https://flagcdn.com/us.svg" width="28" class="rounded-1">
                             <div class="currency-select">
                                 <select id="fromCurrency" onchange="updateUI()">
                                     <option value="USD" data-flag="us">USD</option>
@@ -122,7 +147,7 @@
                         </div>
 
                         <div class="currency-input-group mb-2">
-                            <img id="toFlag" src="https://flagcdn.com/kh.svg" width="28">
+                            <img id="toFlag" src="https://flagcdn.com/kh.svg" width="28" class="rounded-1">
                             <div class="currency-select">
                                 <select id="toCurrency" onchange="updateUI()">
                                     <option value="KHR" data-flag="kh">KHR</option>
@@ -138,20 +163,20 @@
                             <input type="number" id="feeAmount" class="amount-field text-warning" value="0" step="100">
                         </div>
 
-                        <div class="d-flex justify-content-between mt-2 text-muted small">
-                            <span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span>
+                        <div class="d-flex justify-content-between mt-2 text-muted small px-1">
+                            <span><span data-i18n="rate">Rate</span>:</span> <span id="displayRate" class="fw-bold text-white fs-6">-</span>
                         </div>
 
-                        <button onclick="processExchange()" class="btn btn-primary w-100 mt-2 py-3 fw-bold rounded-3 shadow-sm">
+                        <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-3 shadow-sm fs-5">
                             <span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i>
                         </button>
 
-                        <div id="actionButtons" class="row mt-2 g-2" style="display:none">
-                            <div class="col-6"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
-                            <div class="col-6"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 btn-sm"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
+                        <div id="actionButtons" class="row mt-3 g-2" style="display:none">
+                            <div class="col-6"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 py-2"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
+                            <div class="col-6"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 py-2"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
                         </div>
 
-                        <div class="mt-3">
+                        <div class="mt-4">
                             <div class="d-flex justify-content-between align-items-center bg-dark border border-secondary border-opacity-25 rounded-3 py-2 px-3 text-muted">
                                 <div class="fw-bold text-white"><i class="fas fa-users me-1"></i> អតិថិជន:</div>
                                 <div class="small">Day: <strong class="text-success ms-1 fs-6" id="countDay">0</strong></div>
@@ -162,7 +187,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-7">
+                <div class="col-lg-6">
                     <div class="glass-card main-card pb-1">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <ul class="nav nav-pills custom-pills" role="tablist">
@@ -178,16 +203,16 @@
 
                         <div class="tab-content border-bottom border-secondary border-opacity-25 pb-3 mb-3">
                             <div class="tab-pane fade show active" id="content-rates">
-                                <div class="table-responsive">
+                                <div class="table-responsive rates-container">
                                     <table class="table table-borderless rate-table align-middle m-0 text-white">
                                         <thead class="text-muted small border-bottom border-secondary border-opacity-25"><tr><th>Pair</th><th class="text-end">Rate</th></tr></thead>
                                         <tbody>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/KHR</small></div></td><td class="text-end"><input id="usd_khr" type="number" class="rate-input" value="4008" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20"><small class="fw-bold">USD/THB</small></div></td><td class="text-end"><input id="usd_thb" type="number" class="rate-input" value="31.44" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/USD</small></div></td><td class="text-end"><input id="khr_usd" type="number" class="rate-input" value="4021" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20"><small class="fw-bold">KHR/THB</small></div></td><td class="text-end"><input id="khr_thb" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/USD</small></div></td><td class="text-end"><input id="thb_usd" type="number" class="rate-input" value="31.82" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
-                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20"><small class="fw-bold">THB/KHR</small></div></td><td class="text-end"><input id="thb_khr" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20" class="rounded-1"><small class="fw-bold">USD/KHR</small></div></td><td class="text-end"><input id="usd_khr" type="number" class="rate-input" value="4008" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/us.svg" width="20" class="rounded-1"><small class="fw-bold">USD/THB</small></div></td><td class="text-end"><input id="usd_thb" type="number" class="rate-input" value="31.44" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20" class="rounded-1"><small class="fw-bold">KHR/USD</small></div></td><td class="text-end"><input id="khr_usd" type="number" class="rate-input" value="4021" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/kh.svg" width="20" class="rounded-1"><small class="fw-bold">KHR/THB</small></div></td><td class="text-end"><input id="khr_thb" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20" class="rounded-1"><small class="fw-bold">THB/USD</small></div></td><td class="text-end"><input id="thb_usd" type="number" class="rate-input" value="31.82" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
+                                            <tr><td><div class="d-flex align-items-center gap-2"><img src="https://flagcdn.com/th.svg" width="20" class="rounded-1"><small class="fw-bold">THB/KHR</small></div></td><td class="text-end"><input id="thb_khr" type="number" class="rate-input" value="127.6" readonly oninput="updateUI(); updateQuickTable()"></td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -195,12 +220,12 @@
 
                             <div class="tab-pane fade" id="content-convert">
                                 <ul class="nav nav-pills qc-pills mb-3" id="qcTabs" role="tablist">
-                                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qc-usd-khr">USD/KHR</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-usd-thb">USD/THB</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-usd">KHR/USD</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-thb">KHR/THB</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-usd">THB/USD</button></li>
-                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-khr">THB/KHR</button></li>
+                                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qc-usd-khr"><img src="https://flagcdn.com/us.svg" width="14" class="me-1">USD/KHR</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-usd-thb"><img src="https://flagcdn.com/us.svg" width="14" class="me-1">USD/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-usd"><img src="https://flagcdn.com/kh.svg" width="14" class="me-1">KHR/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-khr-thb"><img src="https://flagcdn.com/kh.svg" width="14" class="me-1">KHR/THB</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-usd"><img src="https://flagcdn.com/th.svg" width="14" class="me-1">THB/USD</button></li>
+                                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#qc-thb-khr"><img src="https://flagcdn.com/th.svg" width="14" class="me-1">THB/KHR</button></li>
                                 </ul>
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="qc-usd-khr"><table class="table table-dark table-bordered text-center m-0"><tbody id="table-usd-khr"></tbody></table></div>
@@ -242,6 +267,54 @@
             </div>
         </div>
 
+        <div class="offcanvas offcanvas-end bg-dark text-white border-start border-secondary border-opacity-25" tabindex="-1" id="configOffcanvas">
+            <div class="offcanvas-header border-bottom border-secondary border-opacity-25">
+                <h5 class="offcanvas-title fw-bold"><i class="fas fa-palette me-2 text-primary"></i> UI Settings</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Scale Text</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-font" style="font-size: 12px;"></i>
+                        <input type="range" class="form-range" min="12" max="22" value="16" step="1" id="textScaleInput" oninput="changeTextScale(this.value)">
+                        <i class="fas fa-font" style="font-size: 20px;"></i>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Menu Type</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="menuType" id="menuStatic" autocomplete="off" checked onchange="changeMenuType('static')">
+                        <label class="btn btn-outline-primary" for="menuStatic">Static</label>
+                      
+                        <input type="radio" class="btn-check" name="menuType" id="menuOverlay" autocomplete="off" onchange="changeMenuType('overlay')">
+                        <label class="btn btn-outline-primary" for="menuOverlay">Overlay</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Input Style</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="inputStyle" id="inputOutlined" autocomplete="off" checked onchange="changeInputStyle('outlined')">
+                        <label class="btn btn-outline-primary" for="inputOutlined">Outlined</label>
+                      
+                        <input type="radio" class="btn-check" name="inputStyle" id="inputFilled" autocomplete="off" onchange="changeInputStyle('filled')">
+                        <label class="btn btn-outline-primary" for="inputFilled">Filled</label>
+                    </div>
+                </div>
+
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <label class="form-label fw-bold mb-0">Ripple Effect</label>
+                    <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="rippleToggle" checked onchange="toggleRipple(this.checked)">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <div class="modal fade" id="historyModal" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content glass-card p-0 overflow-hidden border-0">
@@ -250,26 +323,21 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                             <div class="btn-group btn-group-sm" role="group">
                                 <input type="radio" class="btn-check" name="histFilter" id="histDay" autocomplete="off" checked onchange="currentHistFilter='day'; loadHistory()">
                                 <label class="btn btn-outline-primary" for="histDay">Day</label>
-                              
                                 <input type="radio" class="btn-check" name="histFilter" id="histWeek" autocomplete="off" onchange="currentHistFilter='week'; loadHistory()">
                                 <label class="btn btn-outline-primary" for="histWeek">Week</label>
-                              
                                 <input type="radio" class="btn-check" name="histFilter" id="histMonth" autocomplete="off" onchange="currentHistFilter='month'; loadHistory()">
                                 <label class="btn btn-outline-primary" for="histMonth">Month</label>
                             </div>
-
                             <div>
                                 <button class="btn btn-sm btn-outline-info me-2" onclick="saveHistoryPDF()"><i class="fas fa-file-pdf"></i> Save PDF</button>
                                 <button class="btn btn-sm btn-outline-danger me-2" onclick="deleteAll()">Delete All</button>
                                 <input type="text" id="searchInput" class="form-control form-control-sm bg-dark text-white border-secondary d-inline-block" style="width: 150px;" placeholder="Search..." onkeyup="searchHistory()">
                             </div>
                         </div>
-
                         <div class="table-responsive" style="max-height: 55vh;">
                             <div id="printHistorySection" class="pdf-export-container">
                                 <h4 id="pdfHistTitle" class="d-none mb-3 text-center fw-bold">ប្រវត្តិប្រតិបត្តិការ</h4>
@@ -293,45 +361,61 @@
             </div>
             <div class="r-invoice-title">វិក្កយបត្រ</div>
             <div class="r-meta-row">
-                <div>
-                    លេខវិក្កយបត្រ: <span id="rId"></span><br>
-                    កាលបរិច្ឆេទ: <span id="rDate"></span><br>
-                    <span id="rTime"></span>
-                </div>
+                <div>លេខវិក្កយបត្រ: <span id="rId"></span><br>កាលបរិច្ឆេទ: <span id="rDate"></span><br><span id="rTime"></span></div>
             </div>
             <div class="r-row" style="margin-top: 5px;">
-                <div class="r-big-num">ចំនួនទឹកប្រាក់ប្តូរ</div>
-                <div class="r-sep">:</div>
-                <div class="r-val" id="rIn"></div>
+                <div class="r-big-num">ចំនួនទឹកប្រាក់ប្តូរ</div><div class="r-sep">:</div><div class="r-val" id="rIn"></div>
             </div>
             <div class="r-row">
-                <div class="r-big-num">អត្រាប្តូរប្រាក់</div>
-                <div class="r-sep">:</div>
-                <div class="r-val" id="rRate"></div>
+                <div class="r-big-num">អត្រាប្តូរប្រាក់</div><div class="r-sep">:</div><div class="r-val" id="rRate"></div>
             </div>
             <div class="r-row">
-                <div class="r-big-num">ចំនួនទឹកប្រាក់សរុប</div>
-                <div class="r-sep">:</div>
-                <div class="r-val" id="rOut"></div>
+                <div class="r-big-num">ចំនួនទឹកប្រាក់សរុប</div><div class="r-sep">:</div><div class="r-val" id="rOut"></div>
             </div>
             <div class="r-row" id="rFeeRow" style="display:none">
-                <div class="r-big-num">សេវាកម្ម (Fee)</div>
-                <div class="r-sep">:</div>
-                <div class="r-val" id="rFee"></div>
+                <div class="r-big-num">សេវាកម្ម (Fee)</div><div class="r-sep">:</div><div class="r-val" id="rFee"></div>
             </div>
             <div class="r-total-row">
-                <div>ចំនួនទឹកប្រាក់ទទួល</div>
-                <div id="rRec"></div>
+                <div>ចំនួនទឹកប្រាក់ទទួល</div><div id="rRec"></div>
             </div>
-            <div class="r-box">
-                សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>
-                សូមអរគុណ!<br>
-                Tel: 085 63 68 98 , 085 20 30 00
-            </div>
+            <div class="r-box">សូមពិនិត្យអោយបានត្រឹមត្រូវមុនចាកចេញ<br>សូមអរគុណ!<br>Tel: 085 63 68 98 , 085 20 30 00</div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        
         <script>
+        // ==============================================
+        // 🛑 INITIALIZE SUPABASE HERE
+        // ==============================================
+        const SUPABASE_URL = 'https://vlllbjtlsdhkrxgouusy.supabase.co';   
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbGxianRsc2Roa3J4Z291dXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzcyOTcsImV4cCI6MjA5MDExMzI5N30.hVijoujpX2DzKmh8gzCs5JcsPIfyMQ0lh6PVgjnyY6w'; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ==============================================
+        // 🛑 INITIALIZE TELEGRAM HERE
+        // ==============================================
+        const TELEGRAM_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'; // <-- PASTE YOUR TELEGRAM TOKEN HERE
+        const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'; // <-- PASTE YOUR CHAT ID HERE
+
+        // --- CONFIGURATOR SCRIPTS ---
+        function changeTextScale(val) { document.documentElement.style.setProperty('--font-scale', val + 'px'); }
+        function changeMenuType(type) {
+            const nav = document.getElementById('mainNav');
+            const body = document.getElementById('appBody');
+            if(type === 'overlay') { nav.classList.add('overlay-menu'); body.classList.add('body-overlay-padding'); } 
+            else { nav.classList.remove('overlay-menu'); body.classList.remove('body-overlay-padding'); }
+        }
+        function changeInputStyle(style) {
+            const root = document.documentElement;
+            if(style === 'filled') { root.style.setProperty('--input-bg', 'rgba(255,255,255,0.1)'); root.style.setProperty('--input-border-color', 'transparent'); } 
+            else { root.style.setProperty('--input-bg', 'transparent'); root.style.setProperty('--input-border-color', 'rgba(255, 255, 255, 0.08)'); }
+        }
+        function toggleRipple(isEnabled) {
+            const body = document.getElementById('appBody');
+            if(isEnabled) body.classList.add('ripple-enabled'); else body.classList.remove('ripple-enabled');
+        }
+
+        // --- CORE APP SCRIPTS ---
         const i18n = { en: { new_tx: "New Transaction", rate: "Rate", fee: "Fee (៛)", btn_process: "PROCESS", btn_print: "Print", btn_save: "Save", people_count: "Customers", history_title: "History" }, km: { new_tx: "ប្រតិបត្តិការថ្មី", rate: "អត្រា", fee: "សេវាកម្ម (៛)", btn_process: "ដំណើរការ", btn_print: "បោះពុម្ព", btn_save: "រក្សាទុក", people_count: "អតិថិជន", history_title: "ប្រវត្តិ" } };
         
         function setLang(lang) { 
@@ -348,31 +432,23 @@
             const isEditing = !inputs[0].readOnly; 
             
             if (isEditing) {
-                // Save to Backend Database
-                const newRates = {};
+                const updates = [];
                 inputs.forEach(input => { 
-                    newRates[input.id] = parseFloat(input.value);
+                    updates.push({ pair: input.id, rate: parseFloat(input.value) });
                     input.readOnly = true; 
                     input.classList.remove('editable'); 
                 }); 
-                
                 btn.classList.add('btn-outline-secondary'); 
                 btn.classList.remove('btn-success'); 
                 btn.innerHTML = '<i class="fas fa-pen me-1"></i> Edit';
                 
-                await fetch('/update_rates', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(newRates)
-                });
+                // Save directly to Supabase
+                await supabase.from('rates').upsert(updates);
+                
                 updateQuickTable();
                 updateUI();
             } else {
-                // Enable Edit Mode
-                inputs.forEach(input => { 
-                    input.readOnly = false; 
-                    input.classList.add('editable'); 
-                }); 
+                inputs.forEach(input => { input.readOnly = false; input.classList.add('editable'); }); 
                 btn.classList.remove('btn-outline-secondary'); 
                 btn.classList.add('btn-success'); 
                 btn.innerHTML = '<i class="fas fa-check me-1"></i> Done'; 
@@ -380,11 +456,12 @@
         }
 
         async function loadRates() {
-            const res = await fetch('/rates');
-            const data = await res.json();
-            for (const [pair, rate] of Object.entries(data)) {
-                const el = document.getElementById(pair);
-                if (el) el.value = rate;
+            const { data } = await supabase.from('rates').select('*');
+            if (data && data.length > 0) {
+                data.forEach(row => {
+                    const el = document.getElementById(row.pair);
+                    if (el) el.value = row.rate;
+                });
             }
             updateQuickTable();
             updateUI();
@@ -392,12 +469,12 @@
 
         function updateQuickTable() {
             const pairs = [
-                { id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '៛' },
-                { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '$', t: '฿' },
-                { id: 'khr-usd', rateId: 'khr_usd', steps: [4000, 10000, 20000, 50000, 100000, 500000], op: '/', s: '៛', t: '$' },
-                { id: 'khr-thb', rateId: 'khr_thb', steps: [1000, 5000, 10000, 20000, 50000, 100000], op: '/', s: '៛', t: '฿' },
-                { id: 'thb-usd', rateId: 'thb_usd', steps: [100, 500, 1000, 2000, 5000, 10000], op: '/', s: '฿', t: '$' },
-                { id: 'thb-khr', rateId: 'thb_khr', steps: [20, 50, 100, 500, 1000, 5000], op: '*', s: '฿', t: '៛' }
+                { id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$', t: '<img src="https://flagcdn.com/kh.svg" width="16" class="me-1">៛' },
+                { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$', t: '<img src="https://flagcdn.com/th.svg" width="16" class="me-1">฿' },
+                { id: 'khr-usd', rateId: 'khr_usd', steps: [4000, 10000, 20000, 50000, 100000, 500000], op: '/', s: '<img src="https://flagcdn.com/kh.svg" width="16" class="me-1">៛', t: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$' },
+                { id: 'khr-thb', rateId: 'khr_thb', steps: [1000, 5000, 10000, 20000, 50000, 100000], op: '/', s: '<img src="https://flagcdn.com/kh.svg" width="16" class="me-1">៛', t: '<img src="https://flagcdn.com/th.svg" width="16" class="me-1">฿' },
+                { id: 'thb-usd', rateId: 'thb_usd', steps: [100, 500, 1000, 2000, 5000, 10000], op: '/', s: '<img src="https://flagcdn.com/th.svg" width="16" class="me-1">฿', t: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$' },
+                { id: 'thb-khr', rateId: 'thb_khr', steps: [20, 50, 100, 500, 1000, 5000], op: '*', s: '<img src="https://flagcdn.com/th.svg" width="16" class="me-1">฿', t: '<img src="https://flagcdn.com/kh.svg" width="16" class="me-1">៛' }
             ];
 
             pairs.forEach(p => {
@@ -415,6 +492,7 @@
 
         let latestTx = null; 
         const SYMBOLS = {'USD': 'USD', 'KHR': 'KHR', 'THB': 'THB'};
+        const FLAG_DICT = {'USD': 'us', 'KHR': 'kh', 'THB': 'th'};
 
         function getFormattedDateDay(dateInput = null) {
             const d = dateInput ? new Date(dateInput) : new Date();
@@ -426,35 +504,42 @@
         }
 
         async function loadBalances() {
-            const res = await fetch('/balances');
-            const data = await res.json();
+            const { data } = await supabase.from('balances').select('*');
             const container = document.getElementById('balancesList');
             const pnlContainer = document.getElementById('pnlSection');
             
             container.innerHTML = '';
             
             ['USD', 'THB', 'KHR'].forEach(curr => {
-                if(data[curr] !== undefined) {
-                    const sym = SYMBOLS[curr] || '';
-                    container.innerHTML += `
-                        <tr>
-                            <td class="fs-6 fw-bold text-white">${sym}</td>
-                            <td class="fs-6 fw-bold text-info">${data[curr].toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td class="no-pdf">
-                                <div class="d-flex gap-1 justify-content-center">
-                                    <input type="number" id="bal_adj_${curr}" class="form-control form-control-sm bg-dark text-white border-secondary px-1" style="width: 55px" placeholder="Amt">
-                                    <button class="btn btn-sm btn-outline-success px-2" onclick="adjustBalance('${curr}', 1)"><i class="fas fa-plus"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger px-2" onclick="adjustBalance('${curr}', -1)"><i class="fas fa-minus"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
+                let dbRecord = data?.find(row => row.currency === curr);
+                let amount = dbRecord ? dbRecord.amount : 0;
+                
+                const sym = SYMBOLS[curr] || '';
+                const flagImg = `<img src="https://flagcdn.com/${FLAG_DICT[curr]}.svg" width="22" class="me-2 rounded-1 border border-secondary border-opacity-25">`;
+                
+                container.innerHTML += `
+                    <tr>
+                        <td class="fs-6 fw-bold text-white d-flex align-items-center justify-content-center border-0" style="min-height: 48px;">
+                            ${flagImg} ${sym}
+                        </td>
+                        <td class="fs-6 fw-bold text-info">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="no-pdf">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <input type="number" id="bal_adj_${curr}" class="form-control form-control-sm bg-dark text-white border-secondary px-1" style="width: 55px" placeholder="Amt">
+                                <button class="btn btn-sm btn-outline-success px-2" onclick="adjustBalance('${curr}', 1)"><i class="fas fa-plus"></i></button>
+                                <button class="btn btn-sm btn-outline-danger px-2" onclick="adjustBalance('${curr}', -1)"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
 
-            const profit = parseFloat(data['PROFIT_KHR']) || 0;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const { data: txs } = await supabase.from('transactions').select('fee').eq('date', todayStr);
+            let profit = 0;
+            if (txs) txs.forEach(t => profit += (t.fee || 0));
+
             const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
-            
             pnlContainer.innerHTML = `
                 <tr>
                     <td class="fs-6 fw-bold text-white py-3">ប្រាក់ចំណេញថ្ងៃនេះ<br><small class="text-white">(Today's Profit/Fees)</small></td>
@@ -469,11 +554,11 @@
             if(isNaN(amt) || amt <= 0) return;
             
             const finalAmt = amt * multiplier;
-            await fetch('/update_balance', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({currency: curr, amount: finalAmt})
-            });
+            
+            const { data } = await supabase.from('balances').select('amount').eq('currency', curr).single();
+            const newAmount = (data ? data.amount : 0) + finalAmt;
+            await supabase.from('balances').upsert({ currency: curr, amount: newAmount });
+
             document.getElementById(`bal_adj_${curr}`).value = '';
             loadBalances();
         }
@@ -509,47 +594,142 @@
         }
 
         async function processExchange() { 
-            const data = { 
-                from: document.getElementById('fromCurrency').value, 
-                to: document.getElementById('toCurrency').value, 
-                amount: document.getElementById('fromAmount').value, 
-                fee: document.getElementById('feeAmount').value,
-                rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]
-            }; 
+            const f = document.getElementById('fromCurrency').value;
+            const t = document.getElementById('toCurrency').value;
+            const amt = parseFloat(document.getElementById('fromAmount').value);
+            const fee = parseFloat(document.getElementById('feeAmount').value) || 0;
+            const rate = parseFloat(document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]);
             
-            const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); 
-            const json = await res.json(); 
+            if (isNaN(amt) || amt <= 0) { alert("Invalid Amount"); return; }
+
+            let total = 0; let op = "÷";
+            if ((f=='USD'&&t=='KHR') || (f=='USD'&&t=='THB') || (f=='THB'&&t=='KHR')) { total = amt * rate; op = "×"; } 
+            else { total = amt / rate; }
+
+            total = Math.round(total * 100) / 100;
             
-            if(json.success) { 
+            const todayStr = new Date().toISOString().split('T')[0];
+            const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+            // 1. Insert Transaction to Supabase
+            const { error } = await supabase.from('transactions').insert([{
+                date: todayStr,
+                timestamp: timeStr,
+                from_curr: f,
+                to_curr: t,
+                amount_in: amt,
+                amount_out: total,
+                rate: rate,
+                op: op,
+                fee: fee
+            }]);
+
+            if (!error) {
+                // 2. Update Balances in Supabase
+                const { data: balFrom } = await supabase.from('balances').select('amount').eq('currency', f).single();
+                await supabase.from('balances').upsert({ currency: f, amount: (balFrom?.amount || 0) + amt });
+
+                const { data: balTo } = await supabase.from('balances').select('amount').eq('currency', t).single();
+                await supabase.from('balances').upsert({ currency: t, amount: (balTo?.amount || 0) - total });
+
+                if (fee > 0) {
+                    const { data: balKhr } = await supabase.from('balances').select('amount').eq('currency', 'KHR').single();
+                    await supabase.from('balances').upsert({ currency: 'KHR', amount: (balKhr?.amount || 0) + fee });
+                }
+
                 document.getElementById('actionButtons').style.display = 'flex'; 
-                latestTx = {...data, total: json.total, op: json.op, fee: data.fee}; 
+                latestTx = {from: f, to: t, amount: amt, total: total, rate: rate, op: op, fee: fee}; 
+                
                 updateStats(); 
                 loadBalances();
-
                 saveTelegram();
                 setTimeout(() => { printReceipt(); }, 100); 
-            } 
+            } else {
+                alert("Database Error! Transaction not saved.");
+            }
         }
 
         async function updateStats() { 
-            const res = await fetch('/stats'); 
-            const d = await res.json(); 
-            // Display Day, Week, Month customers derived directly from Database
-            document.getElementById('countDay').innerText = d.day; 
-            document.getElementById('countWeek').innerText = d.week; 
-            document.getElementById('countMonth').innerText = d.month; 
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            const week = new Date(); week.setDate(week.getDate() - 7);
+            const weekStr = week.toISOString().split('T')[0];
+            
+            const month = new Date(); month.setDate(month.getDate() - 30);
+            const monthStr = month.toISOString().split('T')[0];
+
+            const { count: dayCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('date', todayStr);
+            const { count: weekCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).gte('date', weekStr);
+            const { count: monthCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).gte('date', monthStr);
+
+            document.getElementById('countDay').innerText = dayCount || 0; 
+            document.getElementById('countWeek').innerText = weekCount || 0; 
+            document.getElementById('countMonth').innerText = monthCount || 0; 
         }
 
+        let currentHistFilter = 'day';
+
+        async function loadHistory() { 
+            const today = new Date();
+            let fromDateStr = '';
+
+            if (currentHistFilter === 'day') { fromDateStr = today.toISOString().split('T')[0]; } 
+            else if (currentHistFilter === 'week') { today.setDate(today.getDate() - 7); fromDateStr = today.toISOString().split('T')[0]; } 
+            else if (currentHistFilter === 'month') { today.setDate(today.getDate() - 30); fromDateStr = today.toISOString().split('T')[0]; }
+
+            let query = supabase.from('transactions').select('*').order('id', { ascending: false }).limit(200);
+            if (currentHistFilter === 'day') { query = query.eq('date', fromDateStr); } 
+            else { query = query.gte('date', fromDateStr); }
+
+            const { data: list } = await query;
+            const tbody = document.getElementById('historyList'); 
+            tbody.innerHTML = ''; 
+            
+            if (list) {
+                list.forEach(item => { 
+                    let feeHtml = item.fee > 0 ? `<span class="text-white">${item.fee}</span>` : '-';
+                    const dateDayStr = getFormattedDateDay(item.date);
+
+                    tbody.innerHTML += `<tr>
+                        <td><div class="fw-bold text-white">${dateDayStr}</div></td>
+                        <td class="text-success">${parseFloat(item.amount_in).toLocaleString()} ${item.from_curr}</td>
+                        <td class="text-info">${parseFloat(item.amount_out).toLocaleString()} ${item.to_curr}</td>
+                        <td><div class="text-white">${feeHtml}</div></td>
+                        <td><div class="text-white">${item.rate}</div></td>
+                        <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>`; 
+                }); 
+            }
+        }
+        
+        async function deleteTx(id) { await supabase.from('transactions').delete().eq('id', id); loadHistory(); updateStats(); loadBalances(); }
+        async function deleteAll() { if(confirm('Delete All Records?')) { await supabase.from('transactions').delete().neq('id', 0); loadHistory(); updateStats(); loadBalances(); } }
+        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
+
+        // Send Direct to Telegram API from Browser
+        async function saveTelegram() { 
+            if(!latestTx || !TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return; 
+            
+            const now = new Date().toLocaleString('en-GB');
+            const sym_from = SYMBOLS[latestTx.from] || '';
+            const sym_to = SYMBOLS[latestTx.to] || '';
+
+            let msg = `<b>🏦 វិក្កយបត្រ – DPK EXCHANGE</b>\n📅 ${now}\n\n📤 <b>ប្រាក់ប្តូរ:</b> ${latestTx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${sym_from} (${latestTx.from})\n📥 <b>ទទួលបាន:</b> ${latestTx.total.toLocaleString(undefined, {minimumFractionDigits: 2})} ${sym_to} (${latestTx.to})\n📊 <b>អត្រាប្តូរប្រាក់:</b> 1 ${latestTx.from} = ${latestTx.rate.toLocaleString()} ${latestTx.to}\n🧮 <b>ការគណនា:</b> ${latestTx.amount.toLocaleString()} ${latestTx.op} ${latestTx.rate.toLocaleString()} = ${latestTx.total.toLocaleString()}`;
+            
+            if (latestTx.fee > 0) { msg += `\n💸 <b>សេវាកម្ម (Fee):</b> ${latestTx.fee.toLocaleString()} ៛`; }
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' }) });
+        }
+
+        // PDF Printing Scripts...
         function printReceipt() { 
             if(!latestTx) return; 
             const now = new Date();
-            const dateStr = now.toLocaleDateString('en-GB'); 
-            const timeStr = now.toLocaleTimeString('en-GB'); 
-            const randId = "690D" + Math.floor(Math.random() * 10000);
-
-            document.getElementById('rId').innerText = randId;
-            document.getElementById('rDate').innerText = dateStr;
-            document.getElementById('rTime').innerText = timeStr;
+            document.getElementById('rId').innerText = "690D" + Math.floor(Math.random() * 10000);
+            document.getElementById('rDate').innerText = now.toLocaleDateString('en-GB');
+            document.getElementById('rTime').innerText = now.toLocaleTimeString('en-GB');
             
             const symFrom = SYMBOLS[latestTx.from] || latestTx.from;
             const symOut = SYMBOLS[latestTx.to] || latestTx.to;
@@ -561,66 +741,23 @@
             document.getElementById('rOut').innerText = totalOut;
             document.getElementById('rRec').innerText = totalOut;
 
-            const fee = parseFloat(latestTx.fee) || 0;
-            if(fee > 0) {
+            if(latestTx.fee > 0) {
                 document.getElementById('rFeeRow').style.display = 'flex';
-                document.getElementById('rFee').innerText = fee.toLocaleString() + ' ៛';
-            } else {
-                document.getElementById('rFeeRow').style.display = 'none';
-            }
+                document.getElementById('rFee').innerText = latestTx.fee.toLocaleString() + ' ៛';
+            } else { document.getElementById('rFeeRow').style.display = 'none'; }
 
             const r = document.getElementById('printReceipt'); 
-            r.style.display = 'block'; 
-            window.print(); 
-            r.style.display = 'none'; 
+            r.style.display = 'block'; window.print(); r.style.display = 'none'; 
         }
-        
-        let currentHistFilter = 'day';
 
-        async function loadHistory() { 
-            const res = await fetch(`/history?period=${currentHistFilter}&pair=all`); 
-            const list = await res.json(); 
-            const tbody = document.getElementById('historyList'); 
-            tbody.innerHTML = ''; 
-            list.forEach(item => { 
-                let feeHtml = item.fee > 0 ? `<span class="text-white">${item.fee}</span>` : '-';
-                const dateDayStr = getFormattedDateDay(item.date);
-
-                tbody.innerHTML += `<tr>
-                    <td><div class="fw-bold text-white">${dateDayStr}</div></td>
-                    <td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td>
-                    <td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td>
-                    <td><div class="text-white">${feeHtml}</div></td>
-                    <td><div class="text-white">${item.rate}</div></td>
-                    <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
-                </tr>`; 
-            }); 
-        }
-        
-        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); loadBalances(); }
-        async function deleteAll() { if(confirm('Delete All Filtered Records?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); loadBalances(); } }
-        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
-        async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); }
-
-        // --- PDF GENERATION USING HTML2PDF ---
         function saveHistoryPDF() {
             document.querySelectorAll('.action-col').forEach(el => el.style.display = 'none');
-            
             const dateDay = getFormattedDateDay();
             document.getElementById('pdfHistTitle').classList.remove('d-none');
             document.getElementById('pdfHistTitle').innerText = `ប្រវត្តិប្រតិបត្តិការ - ${dateDay}`;
-
             const element = document.getElementById('printHistorySection');
             element.classList.add('dark-pdf-mode');
-
-            const opt = { 
-                margin: 10, 
-                filename: `Exchange_History_${currentHistFilter}.pdf`, 
-                image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            };
-            
+            const opt = { margin: 10, filename: `Exchange_History_${currentHistFilter}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save().then(() => {
                 document.querySelectorAll('.action-col').forEach(el => el.style.display = '');
                 document.getElementById('pdfHistTitle').classList.add('d-none');
@@ -630,23 +767,13 @@
 
         function saveBalancesPDF() {
             document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
-            
             const dateDay = getFormattedDateDay();
             const titleEl = document.getElementById('pdfBalTitle');
             titleEl.classList.remove('d-none');
             titleEl.innerText = `របាយការណ៍សមតុល្យ និងប្រាក់ចំណេញ - ${dateDay}`;
-
             const element = document.getElementById('printBalancesSection');
             element.classList.add('dark-pdf-mode');
-
-            const opt = { 
-                margin: 10, 
-                filename: `Balances_Report.pdf`, 
-                image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, 
-                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } 
-            };
-            
+            const opt = { margin: 10, filename: `Balances_Report.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#1a1d20' }, jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save().then(() => {
                 document.querySelectorAll('.no-pdf').forEach(el => el.style.display = '');
                 titleEl.classList.add('d-none');
@@ -656,7 +783,7 @@
 
         document.getElementById('fromAmount').addEventListener('input', updateUI);
         
-        // Initialize App on Page Load
+        // Initialize App
         loadRates();
         updateStats(); 
         setLang('km'); 
