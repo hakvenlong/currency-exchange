@@ -14,9 +14,7 @@
             rel="stylesheet">
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-            
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
         <style>
         :root { 
@@ -124,7 +122,7 @@
             </div>
         </nav>
 
-        <div class="container py-2">
+        <div class="container-fluid py-2">
             <div class="row g-4">
                 <div class="col-lg-6">
                     <div class="glass-card main-card">
@@ -163,20 +161,20 @@
                             <input type="number" id="feeAmount" class="amount-field text-warning" value="0" step="100">
                         </div>
 
-                        <div class="d-flex justify-content-between mt-2 text-muted small px-1">
-                            <span><span data-i18n="rate">Rate</span>:</span> <span id="displayRate" class="fw-bold text-white fs-6">-</span>
+                        <div class="d-flex justify-content-between mt-2 text-muted small">
+                            <span data-i18n="rate">Rate</span>: <span id="displayRate" class="fw-bold text-white">-</span>
                         </div>
 
-                        <button onclick="processExchange()" class="btn btn-primary w-100 mt-3 py-3 fw-bold rounded-3 shadow-sm fs-5">
+                        <button onclick="processExchange()" class="btn btn-primary w-100 mt-2 py-3 fw-bold rounded-3 shadow-sm">
                             <span data-i18n="btn_process">PROCESS</span> <i class="fas fa-paper-plane ms-2"></i>
                         </button>
 
-                        <div id="actionButtons" class="row mt-3 g-2" style="display:none">
-                            <div class="col-6"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 py-2"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
-                            <div class="col-6"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 py-2"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
+                        <div id="actionButtons" class="row mt-2 g-2" style="display:none">
+                            <div class="col-6"><button onclick="printReceipt()" class="btn btn-outline-warning w-100 btn-sm"><i class="fas fa-print"></i> <span data-i18n="btn_print">Print</span></button></div>
+                            <div class="col-6"><button onclick="saveTelegram()" class="btn btn-outline-info w-100 btn-sm"><i class="fab fa-telegram"></i> <span data-i18n="btn_save">Save</span></button></div>
                         </div>
 
-                        <div class="mt-4">
+                        <div class="mt-3">
                             <div class="d-flex justify-content-between align-items-center bg-dark border border-secondary border-opacity-25 rounded-3 py-2 px-3 text-muted">
                                 <div class="fw-bold text-white"><i class="fas fa-users me-1"></i> អតិថិជន:</div>
                                 <div class="small">Day: <strong class="text-success ms-1 fs-6" id="countDay">0</strong></div>
@@ -382,37 +380,36 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        
         <script>
-        // ==============================================
-        // 🛑 INITIALIZE SUPABASE HERE
-        // ==============================================
-        const SUPABASE_URL = 'https://vlllbjtlsdhkrxgouusy.supabase.co';   
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbGxianRsc2Roa3J4Z291dXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzcyOTcsImV4cCI6MjA5MDExMzI5N30.hVijoujpX2DzKmh8gzCs5JcsPIfyMQ0lh6PVgjnyY6w'; 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ==============================================
-        // 🛑 INITIALIZE TELEGRAM HERE
-        // ==============================================
-        const TELEGRAM_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'; // <-- PASTE YOUR TELEGRAM TOKEN HERE
-        const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'; // <-- PASTE YOUR CHAT ID HERE
-
         // --- CONFIGURATOR SCRIPTS ---
-        function changeTextScale(val) { document.documentElement.style.setProperty('--font-scale', val + 'px'); }
+        function changeTextScale(val) {
+            document.documentElement.style.setProperty('--font-scale', val + 'px');
+        }
         function changeMenuType(type) {
             const nav = document.getElementById('mainNav');
             const body = document.getElementById('appBody');
-            if(type === 'overlay') { nav.classList.add('overlay-menu'); body.classList.add('body-overlay-padding'); } 
-            else { nav.classList.remove('overlay-menu'); body.classList.remove('body-overlay-padding'); }
+            if(type === 'overlay') {
+                nav.classList.add('overlay-menu');
+                body.classList.add('body-overlay-padding');
+            } else {
+                nav.classList.remove('overlay-menu');
+                body.classList.remove('body-overlay-padding');
+            }
         }
         function changeInputStyle(style) {
             const root = document.documentElement;
-            if(style === 'filled') { root.style.setProperty('--input-bg', 'rgba(255,255,255,0.1)'); root.style.setProperty('--input-border-color', 'transparent'); } 
-            else { root.style.setProperty('--input-bg', 'transparent'); root.style.setProperty('--input-border-color', 'rgba(255, 255, 255, 0.08)'); }
+            if(style === 'filled') {
+                root.style.setProperty('--input-bg', 'rgba(255,255,255,0.1)');
+                root.style.setProperty('--input-border-color', 'transparent');
+            } else {
+                root.style.setProperty('--input-bg', 'transparent');
+                root.style.setProperty('--input-border-color', 'rgba(255, 255, 255, 0.08)');
+            }
         }
         function toggleRipple(isEnabled) {
             const body = document.getElementById('appBody');
-            if(isEnabled) body.classList.add('ripple-enabled'); else body.classList.remove('ripple-enabled');
+            if(isEnabled) body.classList.add('ripple-enabled');
+            else body.classList.remove('ripple-enabled');
         }
 
         // --- CORE APP SCRIPTS ---
@@ -432,23 +429,29 @@
             const isEditing = !inputs[0].readOnly; 
             
             if (isEditing) {
-                const updates = [];
+                const newRates = {};
                 inputs.forEach(input => { 
-                    updates.push({ pair: input.id, rate: parseFloat(input.value) });
+                    newRates[input.id] = parseFloat(input.value);
                     input.readOnly = true; 
                     input.classList.remove('editable'); 
                 }); 
+                
                 btn.classList.add('btn-outline-secondary'); 
                 btn.classList.remove('btn-success'); 
                 btn.innerHTML = '<i class="fas fa-pen me-1"></i> Edit';
                 
-                // Save directly to Supabase
-                await supabase.from('rates').upsert(updates);
-                
+                await fetch('/update_rates', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(newRates)
+                });
                 updateQuickTable();
                 updateUI();
             } else {
-                inputs.forEach(input => { input.readOnly = false; input.classList.add('editable'); }); 
+                inputs.forEach(input => { 
+                    input.readOnly = false; 
+                    input.classList.add('editable'); 
+                }); 
                 btn.classList.remove('btn-outline-secondary'); 
                 btn.classList.add('btn-success'); 
                 btn.innerHTML = '<i class="fas fa-check me-1"></i> Done'; 
@@ -456,18 +459,18 @@
         }
 
         async function loadRates() {
-            const { data } = await supabase.from('rates').select('*');
-            if (data && data.length > 0) {
-                data.forEach(row => {
-                    const el = document.getElementById(row.pair);
-                    if (el) el.value = row.rate;
-                });
+            const res = await fetch('/rates');
+            const data = await res.json();
+            for (const [pair, rate] of Object.entries(data)) {
+                const el = document.getElementById(pair);
+                if (el) el.value = rate;
             }
             updateQuickTable();
             updateUI();
         }
 
         function updateQuickTable() {
+            // Added flags to quick convert headers
             const pairs = [
                 { id: 'usd-khr', rateId: 'usd_khr', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$', t: '<img src="https://flagcdn.com/kh.svg" width="16" class="me-1">៛' },
                 { id: 'usd-thb', rateId: 'usd_thb', steps: [1, 5, 10, 25, 50, 100], op: '*', s: '<img src="https://flagcdn.com/us.svg" width="16" class="me-1">$', t: '<img src="https://flagcdn.com/th.svg" width="16" class="me-1">฿' },
@@ -492,7 +495,7 @@
 
         let latestTx = null; 
         const SYMBOLS = {'USD': 'USD', 'KHR': 'KHR', 'THB': 'THB'};
-        const FLAG_DICT = {'USD': 'us', 'KHR': 'kh', 'THB': 'th'};
+        const FLAG_DICT = {'USD': 'us', 'KHR': 'kh', 'THB': 'th'}; // Flag dictionary
 
         function getFormattedDateDay(dateInput = null) {
             const d = dateInput ? new Date(dateInput) : new Date();
@@ -504,42 +507,39 @@
         }
 
         async function loadBalances() {
-            const { data } = await supabase.from('balances').select('*');
+            const res = await fetch('/balances');
+            const data = await res.json();
             const container = document.getElementById('balancesList');
             const pnlContainer = document.getElementById('pnlSection');
             
             container.innerHTML = '';
             
             ['USD', 'THB', 'KHR'].forEach(curr => {
-                let dbRecord = data?.find(row => row.currency === curr);
-                let amount = dbRecord ? dbRecord.amount : 0;
-                
-                const sym = SYMBOLS[curr] || '';
-                const flagImg = `<img src="https://flagcdn.com/${FLAG_DICT[curr]}.svg" width="22" class="me-2 rounded-1 border border-secondary border-opacity-25">`;
-                
-                container.innerHTML += `
-                    <tr>
-                        <td class="fs-6 fw-bold text-white d-flex align-items-center justify-content-center border-0" style="min-height: 48px;">
-                            ${flagImg} ${sym}
-                        </td>
-                        <td class="fs-6 fw-bold text-info">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                        <td class="no-pdf">
-                            <div class="d-flex gap-1 justify-content-center">
-                                <input type="number" id="bal_adj_${curr}" class="form-control form-control-sm bg-dark text-white border-secondary px-1" style="width: 55px" placeholder="Amt">
-                                <button class="btn btn-sm btn-outline-success px-2" onclick="adjustBalance('${curr}', 1)"><i class="fas fa-plus"></i></button>
-                                <button class="btn btn-sm btn-outline-danger px-2" onclick="adjustBalance('${curr}', -1)"><i class="fas fa-minus"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                if(data[curr] !== undefined) {
+                    const sym = SYMBOLS[curr] || '';
+                    const flagImg = `<img src="https://flagcdn.com/${FLAG_DICT[curr]}.svg" width="22" class="me-2 rounded-1 border border-secondary border-opacity-25">`;
+                    
+                    container.innerHTML += `
+                        <tr>
+                            <td class="fs-6 fw-bold text-white d-flex align-items-center justify-content-center border-0" style="min-height: 48px;">
+                                ${flagImg} ${sym}
+                            </td>
+                            <td class="fs-6 fw-bold text-info">${data[curr].toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td class="no-pdf">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <input type="number" id="bal_adj_${curr}" class="form-control form-control-sm bg-dark text-white border-secondary px-1" style="width: 55px" placeholder="Amt">
+                                    <button class="btn btn-sm btn-outline-success px-2" onclick="adjustBalance('${curr}', 1)"><i class="fas fa-plus"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger px-2" onclick="adjustBalance('${curr}', -1)"><i class="fas fa-minus"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
             });
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            const { data: txs } = await supabase.from('transactions').select('fee').eq('date', todayStr);
-            let profit = 0;
-            if (txs) txs.forEach(t => profit += (t.fee || 0));
-
+            const profit = parseFloat(data['PROFIT_KHR']) || 0;
             const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
+            
             pnlContainer.innerHTML = `
                 <tr>
                     <td class="fs-6 fw-bold text-white py-3">ប្រាក់ចំណេញថ្ងៃនេះ<br><small class="text-white">(Today's Profit/Fees)</small></td>
@@ -554,11 +554,11 @@
             if(isNaN(amt) || amt <= 0) return;
             
             const finalAmt = amt * multiplier;
-            
-            const { data } = await supabase.from('balances').select('amount').eq('currency', curr).single();
-            const newAmount = (data ? data.amount : 0) + finalAmt;
-            await supabase.from('balances').upsert({ currency: curr, amount: newAmount });
-
+            await fetch('/update_balance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({currency: curr, amount: finalAmt})
+            });
             document.getElementById(`bal_adj_${curr}`).value = '';
             loadBalances();
         }
@@ -594,142 +594,46 @@
         }
 
         async function processExchange() { 
-            const f = document.getElementById('fromCurrency').value;
-            const t = document.getElementById('toCurrency').value;
-            const amt = parseFloat(document.getElementById('fromAmount').value);
-            const fee = parseFloat(document.getElementById('feeAmount').value) || 0;
-            const rate = parseFloat(document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]);
+            const data = { 
+                from: document.getElementById('fromCurrency').value, 
+                to: document.getElementById('toCurrency').value, 
+                amount: document.getElementById('fromAmount').value, 
+                fee: document.getElementById('feeAmount').value,
+                rate: document.getElementById('displayRate').innerText.split('=')[1].split(' ')[1]
+            }; 
             
-            if (isNaN(amt) || amt <= 0) { alert("Invalid Amount"); return; }
-
-            let total = 0; let op = "÷";
-            if ((f=='USD'&&t=='KHR') || (f=='USD'&&t=='THB') || (f=='THB'&&t=='KHR')) { total = amt * rate; op = "×"; } 
-            else { total = amt / rate; }
-
-            total = Math.round(total * 100) / 100;
+            const res = await fetch('/exchange', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); 
+            const json = await res.json(); 
             
-            const todayStr = new Date().toISOString().split('T')[0];
-            const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
-
-            // 1. Insert Transaction to Supabase
-            const { error } = await supabase.from('transactions').insert([{
-                date: todayStr,
-                timestamp: timeStr,
-                from_curr: f,
-                to_curr: t,
-                amount_in: amt,
-                amount_out: total,
-                rate: rate,
-                op: op,
-                fee: fee
-            }]);
-
-            if (!error) {
-                // 2. Update Balances in Supabase
-                const { data: balFrom } = await supabase.from('balances').select('amount').eq('currency', f).single();
-                await supabase.from('balances').upsert({ currency: f, amount: (balFrom?.amount || 0) + amt });
-
-                const { data: balTo } = await supabase.from('balances').select('amount').eq('currency', t).single();
-                await supabase.from('balances').upsert({ currency: t, amount: (balTo?.amount || 0) - total });
-
-                if (fee > 0) {
-                    const { data: balKhr } = await supabase.from('balances').select('amount').eq('currency', 'KHR').single();
-                    await supabase.from('balances').upsert({ currency: 'KHR', amount: (balKhr?.amount || 0) + fee });
-                }
-
+            if(json.success) { 
                 document.getElementById('actionButtons').style.display = 'flex'; 
-                latestTx = {from: f, to: t, amount: amt, total: total, rate: rate, op: op, fee: fee}; 
-                
+                latestTx = {...data, total: json.total, op: json.op, fee: data.fee}; 
                 updateStats(); 
                 loadBalances();
+
                 saveTelegram();
                 setTimeout(() => { printReceipt(); }, 100); 
-            } else {
-                alert("Database Error! Transaction not saved.");
-            }
+            } 
         }
 
         async function updateStats() { 
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
-            
-            const week = new Date(); week.setDate(week.getDate() - 7);
-            const weekStr = week.toISOString().split('T')[0];
-            
-            const month = new Date(); month.setDate(month.getDate() - 30);
-            const monthStr = month.toISOString().split('T')[0];
-
-            const { count: dayCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('date', todayStr);
-            const { count: weekCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).gte('date', weekStr);
-            const { count: monthCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).gte('date', monthStr);
-
-            document.getElementById('countDay').innerText = dayCount || 0; 
-            document.getElementById('countWeek').innerText = weekCount || 0; 
-            document.getElementById('countMonth').innerText = monthCount || 0; 
+            const res = await fetch('/stats'); 
+            const d = await res.json(); 
+            document.getElementById('countDay').innerText = d.day; 
+            document.getElementById('countWeek').innerText = d.week; 
+            document.getElementById('countMonth').innerText = d.month; 
         }
 
-        let currentHistFilter = 'day';
-
-        async function loadHistory() { 
-            const today = new Date();
-            let fromDateStr = '';
-
-            if (currentHistFilter === 'day') { fromDateStr = today.toISOString().split('T')[0]; } 
-            else if (currentHistFilter === 'week') { today.setDate(today.getDate() - 7); fromDateStr = today.toISOString().split('T')[0]; } 
-            else if (currentHistFilter === 'month') { today.setDate(today.getDate() - 30); fromDateStr = today.toISOString().split('T')[0]; }
-
-            let query = supabase.from('transactions').select('*').order('id', { ascending: false }).limit(200);
-            if (currentHistFilter === 'day') { query = query.eq('date', fromDateStr); } 
-            else { query = query.gte('date', fromDateStr); }
-
-            const { data: list } = await query;
-            const tbody = document.getElementById('historyList'); 
-            tbody.innerHTML = ''; 
-            
-            if (list) {
-                list.forEach(item => { 
-                    let feeHtml = item.fee > 0 ? `<span class="text-white">${item.fee}</span>` : '-';
-                    const dateDayStr = getFormattedDateDay(item.date);
-
-                    tbody.innerHTML += `<tr>
-                        <td><div class="fw-bold text-white">${dateDayStr}</div></td>
-                        <td class="text-success">${parseFloat(item.amount_in).toLocaleString()} ${item.from_curr}</td>
-                        <td class="text-info">${parseFloat(item.amount_out).toLocaleString()} ${item.to_curr}</td>
-                        <td><div class="text-white">${feeHtml}</div></td>
-                        <td><div class="text-white">${item.rate}</div></td>
-                        <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
-                    </tr>`; 
-                }); 
-            }
-        }
-        
-        async function deleteTx(id) { await supabase.from('transactions').delete().eq('id', id); loadHistory(); updateStats(); loadBalances(); }
-        async function deleteAll() { if(confirm('Delete All Records?')) { await supabase.from('transactions').delete().neq('id', 0); loadHistory(); updateStats(); loadBalances(); } }
-        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
-
-        // Send Direct to Telegram API from Browser
-        async function saveTelegram() { 
-            if(!latestTx || !TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return; 
-            
-            const now = new Date().toLocaleString('en-GB');
-            const sym_from = SYMBOLS[latestTx.from] || '';
-            const sym_to = SYMBOLS[latestTx.to] || '';
-
-            let msg = `<b>🏦 វិក្កយបត្រ – DPK EXCHANGE</b>\n📅 ${now}\n\n📤 <b>ប្រាក់ប្តូរ:</b> ${latestTx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${sym_from} (${latestTx.from})\n📥 <b>ទទួលបាន:</b> ${latestTx.total.toLocaleString(undefined, {minimumFractionDigits: 2})} ${sym_to} (${latestTx.to})\n📊 <b>អត្រាប្តូរប្រាក់:</b> 1 ${latestTx.from} = ${latestTx.rate.toLocaleString()} ${latestTx.to}\n🧮 <b>ការគណនា:</b> ${latestTx.amount.toLocaleString()} ${latestTx.op} ${latestTx.rate.toLocaleString()} = ${latestTx.total.toLocaleString()}`;
-            
-            if (latestTx.fee > 0) { msg += `\n💸 <b>សេវាកម្ម (Fee):</b> ${latestTx.fee.toLocaleString()} ៛`; }
-
-            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-            await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' }) });
-        }
-
-        // PDF Printing Scripts...
         function printReceipt() { 
             if(!latestTx) return; 
             const now = new Date();
-            document.getElementById('rId').innerText = "690D" + Math.floor(Math.random() * 10000);
-            document.getElementById('rDate').innerText = now.toLocaleDateString('en-GB');
-            document.getElementById('rTime').innerText = now.toLocaleTimeString('en-GB');
+            const dateStr = now.toLocaleDateString('en-GB'); 
+            const timeStr = now.toLocaleTimeString('en-GB'); 
+            const randId = "690D" + Math.floor(Math.random() * 10000);
+
+            document.getElementById('rId').innerText = randId;
+            document.getElementById('rDate').innerText = dateStr;
+            document.getElementById('rTime').innerText = timeStr;
             
             const symFrom = SYMBOLS[latestTx.from] || latestTx.from;
             const symOut = SYMBOLS[latestTx.to] || latestTx.to;
@@ -741,14 +645,46 @@
             document.getElementById('rOut').innerText = totalOut;
             document.getElementById('rRec').innerText = totalOut;
 
-            if(latestTx.fee > 0) {
+            const fee = parseFloat(latestTx.fee) || 0;
+            if(fee > 0) {
                 document.getElementById('rFeeRow').style.display = 'flex';
-                document.getElementById('rFee').innerText = latestTx.fee.toLocaleString() + ' ៛';
-            } else { document.getElementById('rFeeRow').style.display = 'none'; }
+                document.getElementById('rFee').innerText = fee.toLocaleString() + ' ៛';
+            } else {
+                document.getElementById('rFeeRow').style.display = 'none';
+            }
 
             const r = document.getElementById('printReceipt'); 
-            r.style.display = 'block'; window.print(); r.style.display = 'none'; 
+            r.style.display = 'block'; 
+            window.print(); 
+            r.style.display = 'none'; 
         }
+        
+        let currentHistFilter = 'day';
+
+        async function loadHistory() { 
+            const res = await fetch(`/history?period=${currentHistFilter}&pair=all`); 
+            const list = await res.json(); 
+            const tbody = document.getElementById('historyList'); 
+            tbody.innerHTML = ''; 
+            list.forEach(item => { 
+                let feeHtml = item.fee > 0 ? `<span class="text-white">${item.fee}</span>` : '-';
+                const dateDayStr = getFormattedDateDay(item.date);
+
+                tbody.innerHTML += `<tr>
+                    <td><div class="fw-bold text-white">${dateDayStr}</div></td>
+                    <td class="text-success">${parseFloat(item.in).toLocaleString()} ${item.from}</td>
+                    <td class="text-info">${parseFloat(item.out).toLocaleString()} ${item.to}</td>
+                    <td><div class="text-white">${feeHtml}</div></td>
+                    <td><div class="text-white">${item.rate}</div></td>
+                    <td class="action-col"><button class="btn btn-sm text-danger" onclick="deleteTx(${item.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>`; 
+            }); 
+        }
+        
+        async function deleteTx(id) { await fetch(`/delete_transaction/${id}`, {method:'DELETE'}); loadHistory(); updateStats(); loadBalances(); }
+        async function deleteAll() { if(confirm('Delete All Filtered Records?')) { await fetch('/delete_all', { method: 'DELETE' }); loadHistory(); updateStats(); loadBalances(); } }
+        function openHistory() { new bootstrap.Modal(document.getElementById('historyModal')).show(); loadHistory(); }
+        async function saveTelegram() { if(!latestTx) return; await fetch('/save_to_telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(latestTx) }); }
 
         function saveHistoryPDF() {
             document.querySelectorAll('.action-col').forEach(el => el.style.display = 'none');

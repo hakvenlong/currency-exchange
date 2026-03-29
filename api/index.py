@@ -12,19 +12,27 @@ try:
     env_path = os.path.join(BASE_DIR, '.env.development.local')
     load_dotenv(env_path)
 except:
-    pass # Will gracefully skip on Vercel production
+    pass
 
 app = Flask(__name__, template_folder='../templates')
 
 # --- DATABASE CONNECTION ---
 def get_db_connection():
-    # Look for DATABASE_URL (Neon) first, fallback to standard Vercel POSTGRES_URL
+    # Force load environment variables
+    load_dotenv() 
+    
     db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
+    
     if not db_url:
-        raise ValueError("CRITICAL ERROR: Database URL is missing! Check your environment variables.")
+        # This will stop the app and tell you exactly what is wrong
+        raise ConnectionError("Environment variable DATABASE_URL is NOT found. "
+                             "Check your .env file or Vercel settings.")
+
+    # Fix for some providers using 'postgres://' which newer SQLAlchemy/Psycopg2 dislikes
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
         
-    conn = psycopg2.connect(db_url)
-    return conn
+    return psycopg2.connect(db_url)
 
 SYMBOLS = {'USD': '$', 'KHR': '៛', 'THB': '฿'}
 
