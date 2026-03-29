@@ -1,4 +1,4 @@
 flask
 psycopg2-binary
-requests>=2.32.3
+requests
 python-dotenv
