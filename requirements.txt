@@ -7,3 +7,7 @@ psycopg2-binary
 python-dotenv
 requests
 vercel-blob
+flask
+psycopg2-binary
+requests>=2.32.3
+python-dotenv
